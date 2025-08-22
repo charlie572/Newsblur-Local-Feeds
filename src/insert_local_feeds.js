@@ -1,1 +1,5 @@
-console.log("Hello from insert_local_feeds.js");
+async function main() {
+    console.log(NEWSBLUR.assets.feeds);
+}
+
+setTimeout(main, 5000);
