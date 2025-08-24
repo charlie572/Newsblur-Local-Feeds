@@ -3,11 +3,6 @@
  * injected into newsblur. Use multi-line comments instead.
  */
 
-LocalFeedTitleView = NEWSBLUR.Views.FeedTitleView.extend({
-    open: function (e, options) {
-        console.log("Opening local feed");
-    }
-});
 
 function load_local_feed(feed_id) {
 
