@@ -10,6 +10,13 @@ LocalFeedTitleView = NEWSBLUR.Views.FeedTitleView.extend({
 });
 
 async function main() {
+    NEWSBLUR.assets.load_feed = function (page, first_load, callback, error_callback) {
+        console.log("my load_feed function");
+        NEWSBLUR.assets.constructor.prototype.load_feed.call(
+            NEWSBLUR.assets, page, first_load, callback, error_callback
+        );
+    };
+
     /* new feed data */
     const rss_url = "http://localhost:1200/spotify/artist/6N3egqZ7OtcYYXyU6PBdNr";
     const feed_url = "https://open.spotify.com/artist/6N3egqZ7OtcYYXyU6PBdNr";
