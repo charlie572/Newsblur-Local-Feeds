@@ -70,7 +70,7 @@ async function main() {
 
     /* add feed view to document */
     const root_folder_element = document.getElementsByClassName("NB-root")[0];
-    const first_feed = root_folder_element.children[2];
+    const first_feed = root_folder_element.children[0];
     root_folder_element.insertBefore(view.el, first_feed);
 }
 
