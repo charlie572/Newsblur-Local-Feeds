@@ -65,7 +65,7 @@ async function main() {
     const folder = NEWSBLUR.assets.folders.find_folder("");
 
     /* create feed view */
-    const view = new LocalFeedTitleView({
+    const view = new NEWSBLUR.Views.FeedTitleView({
         model: feed,
         type: 'feed',
         depth: 0,
