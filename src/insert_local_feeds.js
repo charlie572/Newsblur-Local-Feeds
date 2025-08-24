@@ -9,12 +9,20 @@ LocalFeedTitleView = NEWSBLUR.Views.FeedTitleView.extend({
     }
 });
 
+function load_local_feed(feed_id) {
+
+}
+
 async function main() {
-    NEWSBLUR.assets.load_feed = function (page, first_load, callback, error_callback) {
-        console.log("my load_feed function");
-        NEWSBLUR.assets.constructor.prototype.load_feed.call(
-            NEWSBLUR.assets, page, first_load, callback, error_callback
-        );
+    /* override load_feed method */
+    NEWSBLUR.assets.load_feed = function (feed_id, page, first_load, callback, error_callback) {
+        if (feed_id < 0) {
+            load_local_feed(feed_id);
+        } else {
+            NEWSBLUR.assets.constructor.prototype.load_feed.call(
+                NEWSBLUR.assets, feed_id, page, first_load, callback, error_callback
+            );
+        }
     };
 
     /* new feed data */
