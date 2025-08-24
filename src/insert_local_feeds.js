@@ -3,6 +3,12 @@
  * injected into newsblur. Use multi-line comments instead.
  */
 
+LocalFeedTitleView = NEWSBLUR.Views.FeedTitleView.extend({
+    open: function (e, options) {
+        console.log("Opening local feed");
+    }
+});
+
 async function main() {
     /* new feed data */
     const rss_url = "http://localhost:1200/spotify/artist/6N3egqZ7OtcYYXyU6PBdNr";
@@ -59,7 +65,7 @@ async function main() {
     const folder = NEWSBLUR.assets.folders.find_folder("");
 
     /* create feed view */
-    const view = new NEWSBLUR.Views.FeedTitleView({
+    const view = new LocalFeedTitleView({
         model: feed,
         type: 'feed',
         depth: 0,
