@@ -14,7 +14,7 @@ async function main() {
     const rss_url = "http://localhost:1200/spotify/artist/6N3egqZ7OtcYYXyU6PBdNr";
     const feed_url = "https://open.spotify.com/artist/6N3egqZ7OtcYYXyU6PBdNr";
     const image_url = "https://i.scdn.co/image/ab6761610000e5eb100da61a04b3858e789ebeab";
-    const feed_id = 9999999;
+    const feed_id = -1;
     const feed_title = "Albums of TWRP";
 
     const feed_attributes = {
