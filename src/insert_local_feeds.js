@@ -1,5 +1,10 @@
+/* 
+ * WARNING: single-line comments don't work in this script when it is 
+ * injected into newsblur. Use multi-line comments instead.
+ */
+
 async function main() {
-    // new feed data
+    /* new feed data */
     const rss_url = "http://localhost:1200/spotify/artist/6N3egqZ7OtcYYXyU6PBdNr";
     const feed_url = "https://open.spotify.com/artist/6N3egqZ7OtcYYXyU6PBdNr";
     const image_url = "https://i.scdn.co/image/ab6761610000e5eb100da61a04b3858e789ebeab";
@@ -47,13 +52,13 @@ async function main() {
         "selected": false
     };
 
-    // create feed model instance
+    /* create feed model instance */
     const feed = new NEWSBLUR.Models.Feed(feed_attributes);
 
-    // get root folder
+    /* get root folder */
     const folder = NEWSBLUR.assets.folders.find_folder("");
 
-    // create feed view
+    /* create feed view */
     const view = new NEWSBLUR.Views.FeedTitleView({
         model: feed,
         type: 'feed',
@@ -63,7 +68,7 @@ async function main() {
     }).render();
     feed.views.push(view);
 
-    // add feed view to document
+    /* add feed view to document */
     const root_folder_element = document.getElementsByClassName("NB-root")[0];
     const first_feed = root_folder_element.children[2];
     root_folder_element.insertBefore(view.el, first_feed);
