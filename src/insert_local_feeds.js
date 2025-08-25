@@ -3,8 +3,6 @@
  * injected into newsblur. Use multi-line comments instead.
  */
 
-const extension_id = "@newsblur_local_feeds";
-
 const local_feeds = new Map();
 
 const newsblur_origin = "https://www.newsblur.com";
@@ -15,10 +13,14 @@ window.addEventListener(
             event.origin == newsblur_origin
             && event.data.command == "rss_result"
         ) {
-            console.log(event);
+            process_rss_result(event.data.rss)
         }
     }
 );
+
+function process_rss_result(rss_data) {
+    console.log(rss_data);
+}
 
 function parse_rss(url) {
     console.log("Posting message");
