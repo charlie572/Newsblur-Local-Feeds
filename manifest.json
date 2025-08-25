@@ -8,5 +8,9 @@
 			"matches": ["https://www.newsblur.com/*"],
 			"js": ["dist/inject.js"]
 		}
+	],
+
+	"permissions": [
+		"*://localhost/*"
 	]
 }

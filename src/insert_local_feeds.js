@@ -3,9 +3,38 @@
  * injected into newsblur. Use multi-line comments instead.
  */
 
+const extension_id = "@newsblur_local_feeds";
+
+const local_feeds = new Map();
+
+const newsblur_origin = "https://www.newsblur.com";
+window.addEventListener(
+    "message",
+    event => {
+        if (
+            event.origin == newsblur_origin
+            && event.data.command == "rss_result"
+        ) {
+            console.log(event);
+        }
+    }
+);
+
+function parse_rss(url) {
+    console.log("Posting message");
+    window.postMessage(
+        {
+            command: "parse_rss",
+            url: url,
+        },
+        "*",
+    );
+}
 
 function load_local_feed(feed_id) {
-
+    const feed = local_feeds.get(feed_id);
+    const rss_address = feed.get("feed_address");
+    parse_rss(rss_address);
 }
 
 async function main() {
@@ -70,6 +99,7 @@ async function main() {
 
     /* create feed model instance */
     const feed = new NEWSBLUR.Models.Feed(feed_attributes);
+    local_feeds.set(feed.id, feed);
 
     /* get root folder */
     const folder = NEWSBLUR.assets.folders.find_folder("");
