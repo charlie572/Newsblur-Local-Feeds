@@ -13,13 +13,74 @@ window.addEventListener(
             event.origin == newsblur_origin
             && event.data.command == "rss_result"
         ) {
-            process_rss_result(event.data.rss)
+            process_rss_result(event.data.rss);
         }
     }
 );
 
+function get_date_string(date) {
+    return (
+        date.getFullYear()
+        + "-"
+        + date.getMonth()
+        + "-"
+        + date.getDate()
+        + " "
+        + date.getHours()
+        + ":"
+        + date.getMinutes()
+        + ":"
+        + date.getSeconds()
+    );
+}
+
+function create_story(story_data) {
+    const attributes = {
+        "story_hash": null,
+        "story_tags": [],
+        "story_date": get_date_string(story_data.pubDate),
+        "story_timestamp": Date.parse(story_data.pubDate),
+        "story_authors": story_data.author,
+        "story_title": story_data.title,
+        "story_content": null,
+        "story_permalink": story_data.link,
+        "image_urls": [],
+        "secure_image_urls": {},
+        "secure_image_thumbnails": {},
+        "story_feed_id": null,
+        "has_modifications": false,
+        "comment_count": null,
+        "comment_user_ids": [],
+        "share_count": null,
+        "share_user_ids": [],
+        "guid_hash": null,
+        "id": story_data.link,
+        "friend_comments": [],
+        "friend_shares": [],
+        "public_comments": [],
+        "reply_count": 0,
+        "short_parsed_date": null,
+        "long_parsed_date": null,
+        "read_status": 0,
+        "intelligence": {
+            "feed": 1,
+            "author": 0,
+            "tags": 0,
+            "title": 0
+        },
+        "score": 1,
+        "visible": true,
+        "images_loaded": true
+    };
+
+    const story = new NEWSBLUR.Models.Story(attributes);
+
+    return story;
+}
+
 function process_rss_result(rss_data) {
-    console.log(rss_data);
+    const stories = rss_data.items.map(create_story);
+    NEWSBLUR.assets.stories.reset(stories, { added: stories.length });
 }
 
 function parse_rss(url) {

@@ -1,5 +1,7 @@
 import js from "./insert_local_feeds.js"
 
+
+
 async function parse_rss(url) {
     console.log("Fetching rss feed " + url);
     const response = await fetch(url);
@@ -24,7 +26,8 @@ async function parse_rss(url) {
             title: item.querySelector("title").textContent,
             description: item.querySelector("description").textContent,
             link: item.querySelector("link").textContent,
-            pubDate: item.querySelector("pubDate").textContent,
+            pubDate: new Date(item.querySelector("pubDate").textContent),
+            author: item.querySelector("author").textContent,
         });
     }
 
