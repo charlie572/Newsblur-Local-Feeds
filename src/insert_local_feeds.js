@@ -105,6 +105,10 @@ async function load_local_feed(feed_id) {
     NEWSBLUR.assets.stories.reset(stories, { added: stories.length });
 }
 
+function add_local_feed(url, folder) {
+    console.log("Saving local feed:", url, folder);
+}
+
 async function main() {
     /* override load_feed method */
     NEWSBLUR.assets.load_feed = function (feed_id, page, first_load, callback, error_callback) {
@@ -127,6 +131,10 @@ async function main() {
         button.innerText = "Add local site";
         button.style.float = "right";
         button.style.margin = "6px 0 6px 0";
+
+        const url = this.el.querySelector(".NB-add-url");
+        const folder = this.el.querySelector(".NB-folders");
+        button.onclick = () => add_local_feed(url.value, folder.value);
 
         const add_site_group = this.el.querySelector(".NB-add-site");
         add_site_group.appendChild(button);
