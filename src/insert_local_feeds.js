@@ -16,10 +16,21 @@ window.addEventListener(
             message_resolvers.get("rss_result")(event.data.rss);
             message_resolvers.delete("rss_result");
         } else if (event.data.command === "local_feed") {
-            const attributes = event.data.attributes;
-            const feed = new NEWSBLUR.Models.Feed(attributes);
+            const feed_data = event.data.feed_data;
+            const feed = create_feed(feed_data.attributes, feed_data.folders);
             message_resolvers.get("local_feed")(feed);
             message_resolvers.delete("local_feed");
+        } else if (event.data.command === "local_feeds") {
+            const feed_data = event.data.feed_data;
+            const feeds = {};
+            for (var id in feed_data) {
+                feeds[id] = create_feed(
+                    feed_data[id].attributes, 
+                    feed_data[id].folders,
+                );
+            }
+            message_resolvers.get("local_feeds")(feeds);
+            message_resolvers.delete("local_feeds");
         }
     }
 );
@@ -93,7 +104,7 @@ async function parse_rss(url) {
         "*",
     );
 
-    let {promise, resolve, reject} = Promise.withResolvers();
+    let { promise, resolve, reject } = Promise.withResolvers();
     message_resolvers.set("rss_result", resolve);
     return promise;
 }
@@ -107,19 +118,43 @@ async function get_local_feed_from_storage(feed_id) {
         "*",
     );
 
-    let {promise, resolve, reject} = Promise.withResolvers();
+    let { promise, resolve, reject } = Promise.withResolvers();
     message_resolvers.set("local_feed", resolve);
     return promise;
 }
 
-function add_local_feed_to_storage(feed) {
+async function get_local_feeds_from_storage() {
     window.postMessage(
         {
-            command: "add_local_feed",
-            attributes: feed.attributes,
+            command: "get_local_feeds",
         },
         "*",
     );
+
+    let { promise, resolve, reject } = Promise.withResolvers();
+    message_resolvers.set("local_feeds", resolve);
+    return promise;
+}
+
+function add_local_feed_to_storage(feed) {
+    const folder_names = feed.folders.map(folder => folder.get("folder_title").toLowerCase());
+    window.postMessage(
+        {
+            command: "add_local_feed",
+            feed_data: {
+                attributes: feed.attributes,
+                folders: folder_names,
+            },
+        },
+        "*",
+    );
+}
+
+async function load_local_feeds() {
+    const feeds = await get_local_feeds_from_storage();
+    for (var id in feeds) {
+        add_feed_to_document(feeds[id]);
+    }
 }
 
 async function load_local_feed(feed_id) {
@@ -127,9 +162,22 @@ async function load_local_feed(feed_id) {
     const rss_address = feed.get("feed_address");
 
     const rss_data = await parse_rss(rss_address);
-    
+
     const stories = rss_data.items.map(create_story);
     NEWSBLUR.assets.stories.reset(stories, { added: stories.length });
+}
+
+function create_feed(attributes, folders) {
+    const feed = new NEWSBLUR.Models.Feed(attributes);
+
+    /* 
+     * In Newsblur, feed.folders doesn't seem to contain NEWSBLUR.Models.Folder
+     * objects. It seems to contain the result of an AJAX request instead. I'm 
+     * just going to use Folder objects though. I can't see how to construct
+     * the proper objects.
+     */
+    feed.folders = folders.map(name => NEWSBLUR.assets.folders.find_folder(name));
+    return feed;
 }
 
 async function add_local_feed(rss_url, folder_name) {
@@ -178,30 +226,35 @@ async function add_local_feed(rss_url, folder_name) {
         "selected": false
     };
 
-    /* create feed model instance */
-    const feed = new NEWSBLUR.Models.Feed(feed_attributes);
-
     /* get folder */
     folder_name = folder_name.split(":")[1].toLowerCase();
     const folder = NEWSBLUR.assets.folders.find_folder(folder_name);
 
-    /* create feed view */
-    const depth = folder.folder_view.options.depth;
-    const view = new NEWSBLUR.Views.FeedTitleView({
-        model: feed,
-        type: 'feed',
-        depth: depth,
-        folder_title: folder_name,
-        folder: folder,
-    }).render();
-    feed.views.push(view);
+    /* create feed model instance */
+    const feed = create_feed(feed_attributes, [folder_name]);
 
-    /* save to browser storage */
     add_local_feed_to_storage(feed);
 
-    /* add feed view to document */
-    const folder_element = folder.folder_view.el.querySelector(".folder");
-    folder_element.appendChild(view.el);
+    add_feed_to_document(feed)
+}
+
+function add_feed_to_document(feed) {
+    for (var folder of feed.folders) {
+        /* create feed view */
+        const depth = folder.folder_view.options.depth;
+        const view = new NEWSBLUR.Views.FeedTitleView({
+            model: feed,
+            type: 'feed',
+            depth: depth,
+            folder_title: folder.get("folder_title"),
+            folder: folder,
+        }).render();
+        feed.views.push(view);
+
+        /* add feed view to document */
+        const folder_element = folder.folder_view.el.querySelector(".folder");
+        folder_element.appendChild(view.el);
+    }
 }
 
 function main() {
@@ -235,6 +288,8 @@ function main() {
         const add_site_group = this.el.querySelector(".NB-add-site");
         add_site_group.appendChild(button);
     };
+
+    setTimeout(load_local_feeds, 2000);
 }
 
 main();

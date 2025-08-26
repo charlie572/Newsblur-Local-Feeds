@@ -56,16 +56,25 @@ window.addEventListener(
         } else if (event.data.command === "get_local_feed") {
             browser.storage.sync.get("local_feeds").then(result => {
                 const feeds = result.local_feeds;
-                const attributes = feeds[String(event.data.feed_id)];
+                const feed_data = feeds[String(event.data.feed_id)];
                 event.source.postMessage({
                     command: "local_feed",
-                    attributes: attributes,
+                    feed_data: feed_data,
+                });
+            });
+        } else if (event.data.command === "get_local_feeds") {
+            browser.storage.sync.get("local_feeds").then(result => {
+                const feed_data = result.local_feeds;
+                event.source.postMessage({
+                    command: "local_feeds",
+                    feed_data: feed_data,
                 });
             });
         } else if (event.data.command === "add_local_feed") {
             browser.storage.sync.get("local_feeds").then(result => {
                 const feeds = result.local_feeds;
-                feeds[event.data.attributes.id] = event.data.attributes;
+                const feed_data = event.data.feed_data;
+                feeds[feed_data.attributes.id] = feed_data;
                 browser.storage.sync.set({local_feeds: feeds});
             });
         }
