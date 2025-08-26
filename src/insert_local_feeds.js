@@ -5,6 +5,7 @@
 
 const local_feeds = new Map();
 
+const message_resolvers = new Map();
 const newsblur_origin = "https://www.newsblur.com";
 window.addEventListener(
     "message",
@@ -13,7 +14,8 @@ window.addEventListener(
             event.origin == newsblur_origin
             && event.data.command == "rss_result"
         ) {
-            process_rss_result(event.data.rss);
+            message_resolvers.get("rss_result")(event.data.rss);
+            message_resolvers.delete("rss_result");
         }
     }
 );
@@ -78,12 +80,7 @@ function create_story(story_data) {
     return story;
 }
 
-function process_rss_result(rss_data) {
-    const stories = rss_data.items.map(create_story);
-    NEWSBLUR.assets.stories.reset(stories, { added: stories.length });
-}
-
-function parse_rss(url) {
+async function parse_rss(url) {
     console.log("Posting message");
     window.postMessage(
         {
@@ -92,12 +89,20 @@ function parse_rss(url) {
         },
         "*",
     );
+
+    let {promise, resolve, reject} = Promise.withResolvers();
+    message_resolvers.set("rss_result", resolve);
+    return promise;
 }
 
-function load_local_feed(feed_id) {
+async function load_local_feed(feed_id) {
     const feed = local_feeds.get(feed_id);
     const rss_address = feed.get("feed_address");
-    parse_rss(rss_address);
+
+    rss_data = await parse_rss(rss_address);
+    
+    const stories = rss_data.items.map(create_story);
+    NEWSBLUR.assets.stories.reset(stories, { added: stories.length });
 }
 
 async function main() {
