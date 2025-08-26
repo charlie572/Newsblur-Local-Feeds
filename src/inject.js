@@ -1,9 +1,6 @@
 import js from "./insert_local_feeds.js"
 
-
-
 async function parse_rss(url) {
-    console.log("Fetching rss feed " + url);
     const response = await fetch(url);
     if (!response.ok) {
         throw new Error(`Response status: ${response.status}`);
@@ -44,22 +41,50 @@ const newsblur_origin = "https://www.newsblur.com";
 window.addEventListener(
     "message",
     event => {
-        if (
-            event.origin === newsblur_origin
-            && event.data.command === "parse_rss"
-        ) {
+        if (event.origin !== newsblur_origin) {
+            return;
+        }
+        
+        if (event.data.command === "parse_rss") {
             parse_rss(event.data.url)
             .then(rss => {
-                event.source.postMessage(
-                    {
-                        command: "rss_result",
-                        rss: rss,
-                    }
-                );
+                event.source.postMessage({
+                    command: "rss_result",
+                    rss: rss,
+                });
+            });
+        } else if (event.data.command === "get_local_feed") {
+            browser.storage.sync.get("local_feeds").then(result => {
+                const feeds = result.local_feeds;
+                const attributes = feeds[String(event.data.feed_id)];
+                event.source.postMessage({
+                    command: "local_feed",
+                    attributes: attributes,
+                });
+            });
+        } else if (event.data.command === "add_local_feed") {
+            browser.storage.sync.get("local_feeds").then(result => {
+                const feeds = result.local_feeds;
+                feeds[event.data.attributes.id] = event.data.attributes;
+                browser.storage.sync.set({local_feeds: feeds});
             });
         }
     }
 );
+
+async function setup_storage() {
+    // check if local_feeds is defined in browser storage
+    const result = await browser.storage.sync.get("local_feeds");
+    if ("local_feeds" in result) {
+        return
+    }
+
+    // initialise local storage
+    browser.storage.sync.set({
+        local_feeds: {}
+    });
+}
+setup_storage();
 
 var script = document.createElement("script");
 script.innerText = js;

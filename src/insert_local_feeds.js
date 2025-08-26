@@ -3,19 +3,23 @@
  * injected into newsblur. Use multi-line comments instead.
  */
 
-const local_feeds = new Map();
-
 const message_resolvers = new Map();
 const newsblur_origin = "https://www.newsblur.com";
 window.addEventListener(
     "message",
     event => {
-        if (
-            event.origin == newsblur_origin
-            && event.data.command == "rss_result"
-        ) {
+        if (event.origin !== newsblur_origin) {
+            return;
+        }
+
+        if (event.data.command === "rss_result") {
             message_resolvers.get("rss_result")(event.data.rss);
             message_resolvers.delete("rss_result");
+        } else if (event.data.command === "local_feed") {
+            const attributes = event.data.attributes;
+            const feed = new NEWSBLUR.Models.Feed(attributes);
+            message_resolvers.get("local_feed")(feed);
+            message_resolvers.delete("local_feed");
         }
     }
 );
@@ -81,7 +85,6 @@ function create_story(story_data) {
 }
 
 async function parse_rss(url) {
-    console.log("Posting message");
     window.postMessage(
         {
             command: "parse_rss",
@@ -95,18 +98,38 @@ async function parse_rss(url) {
     return promise;
 }
 
+async function get_local_feed_from_storage(feed_id) {
+    window.postMessage(
+        {
+            command: "get_local_feed",
+            feed_id: feed_id,
+        },
+        "*",
+    );
+
+    let {promise, resolve, reject} = Promise.withResolvers();
+    message_resolvers.set("local_feed", resolve);
+    return promise;
+}
+
+function add_local_feed_to_storage(feed) {
+    window.postMessage(
+        {
+            command: "add_local_feed",
+            attributes: feed.attributes,
+        },
+        "*",
+    );
+}
+
 async function load_local_feed(feed_id) {
-    const feed = local_feeds.get(feed_id);
+    const feed = await get_local_feed_from_storage(feed_id);
     const rss_address = feed.get("feed_address");
 
-    rss_data = await parse_rss(rss_address);
+    const rss_data = await parse_rss(rss_address);
     
     const stories = rss_data.items.map(create_story);
     NEWSBLUR.assets.stories.reset(stories, { added: stories.length });
-}
-
-function get_folder_depth(folder) {
-
 }
 
 async function add_local_feed(rss_url, folder_name) {
@@ -157,13 +180,10 @@ async function add_local_feed(rss_url, folder_name) {
 
     /* create feed model instance */
     const feed = new NEWSBLUR.Models.Feed(feed_attributes);
-    local_feeds.set(feed.id, feed);
 
     /* get folder */
     folder_name = folder_name.split(":")[1].toLowerCase();
-    console.log(folder_name);
     const folder = NEWSBLUR.assets.folders.find_folder(folder_name);
-    console.log(folder);
 
     /* create feed view */
     const depth = folder.folder_view.options.depth;
@@ -175,6 +195,9 @@ async function add_local_feed(rss_url, folder_name) {
         folder: folder,
     }).render();
     feed.views.push(view);
+
+    /* save to browser storage */
+    add_local_feed_to_storage(feed);
 
     /* add feed view to document */
     const folder_element = folder.folder_view.el.querySelector(".folder");

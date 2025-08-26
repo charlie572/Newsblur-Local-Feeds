@@ -11,6 +11,13 @@
 	],
 
 	"permissions": [
-		"*://localhost/*"
-	]
+		"*://localhost/*",
+		"storage"
+	],
+
+	"browser_specific_settings": {
+		"gecko": {
+			"id": "@newsblur-local-feeds"
+		}
+	}
 }
