@@ -176,13 +176,14 @@ async function add_local_feed(rss_url, folder_name) {
     folder_element.appendChild(view.el);
 }
 
-async function main() {
+function main() {
     /* override load_feed method */
-    NEWSBLUR.assets.load_feed = function (feed_id, page, first_load, callback, error_callback) {
+    const load_feed = NEWSBLUR.AssetModel.prototype.load_feed;
+    NEWSBLUR.AssetModel.prototype.load_feed = function (feed_id, page, first_load, callback, error_callback) {
         if (feed_id < 0) {
             load_local_feed(feed_id);
         } else {
-            NEWSBLUR.assets.constructor.prototype.load_feed.call(
+            load_feed.call(
                 NEWSBLUR.assets, feed_id, page, first_load, callback, error_callback
             );
         }
@@ -208,4 +209,4 @@ async function main() {
     };
 }
 
-setTimeout(main, 5000);
+main();
