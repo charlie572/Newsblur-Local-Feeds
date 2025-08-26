@@ -112,6 +112,19 @@ async function main() {
         }
     };
 
+    /* add button to ReaderAddFeed dialog */
+    const render_reader_add_feed = NEWSBLUR.ReaderAddFeed.prototype.render;
+    NEWSBLUR.ReaderAddFeed.prototype.render = function () {
+        render_reader_add_feed.call(this);
+
+        const button = document.createElement("div");
+        button.className = "NB-modal-submit-button NB-modal-submit-green NB-add-url-submit";
+        button.innerText = "Add local site";
+
+        const add_site_group = this.el.querySelector(".NB-add-site");
+        add_site_group.appendChild(button);
+    };
+
     /* new feed data */
     const rss_url = "http://localhost:1200/spotify/artist/6N3egqZ7OtcYYXyU6PBdNr";
     const feed_url = "https://open.spotify.com/artist/6N3egqZ7OtcYYXyU6PBdNr";
