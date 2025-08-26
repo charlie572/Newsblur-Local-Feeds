@@ -123,8 +123,10 @@ async function main() {
         render_reader_add_feed.call(this);
 
         const button = document.createElement("div");
-        button.className = "NB-modal-submit-button NB-modal-submit-green NB-add-url-submit";
+        button.className = "NB-modal-submit-button NB-modal-submit-green";
         button.innerText = "Add local site";
+        button.style.float = "right";
+        button.style.margin = "6px 0 6px 0";
 
         const add_site_group = this.el.querySelector(".NB-add-site");
         add_site_group.appendChild(button);
