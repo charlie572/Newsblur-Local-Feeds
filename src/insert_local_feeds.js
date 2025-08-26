@@ -105,6 +105,10 @@ async function load_local_feed(feed_id) {
     NEWSBLUR.assets.stories.reset(stories, { added: stories.length });
 }
 
+function get_folder_depth(folder) {
+
+}
+
 async function add_local_feed(rss_url, folder_name) {
     rss_data = await parse_rss(rss_url);
 
@@ -162,10 +166,11 @@ async function add_local_feed(rss_url, folder_name) {
     console.log(folder);
 
     /* create feed view */
+    const depth = folder.folder_view.options.depth;
     const view = new NEWSBLUR.Views.FeedTitleView({
         model: feed,
         type: 'feed',
-        depth: 0,
+        depth: depth,
         folder_title: folder_name,
         folder: folder,
     }).render();
