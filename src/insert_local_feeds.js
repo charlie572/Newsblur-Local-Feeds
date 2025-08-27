@@ -31,6 +31,11 @@ window.addEventListener(
             }
             message_resolvers.get("local_feeds")(feeds);
             message_resolvers.delete("local_feeds");
+        } else if (event.data.command === "stories") {
+            const story_data = event.data.story_data;
+            const stories = story_data.map(data => create_story(data));
+            message_resolvers.get("stories")(stories);
+            message_resolvers.delete("stories");
         }
     }
 );
@@ -52,47 +57,7 @@ function get_date_string(date) {
 }
 
 function create_story(story_data) {
-    const attributes = {
-        "story_hash": null,
-        "story_tags": [],
-        "story_date": get_date_string(story_data.pubDate),
-        "story_timestamp": Date.parse(story_data.pubDate),
-        "story_authors": story_data.author,
-        "story_title": story_data.title,
-        "story_content": null,
-        "story_permalink": story_data.link,
-        "image_urls": [],
-        "secure_image_urls": {},
-        "secure_image_thumbnails": {},
-        "story_feed_id": null,
-        "has_modifications": false,
-        "comment_count": null,
-        "comment_user_ids": [],
-        "share_count": null,
-        "share_user_ids": [],
-        "guid_hash": null,
-        "id": story_data.link,
-        "friend_comments": [],
-        "friend_shares": [],
-        "public_comments": [],
-        "reply_count": 0,
-        "short_parsed_date": null,
-        "long_parsed_date": null,
-        "read_status": 0,
-        "intelligence": {
-            "feed": 1,
-            "author": 0,
-            "tags": 0,
-            "title": 0
-        },
-        "score": 1,
-        "visible": true,
-        "images_loaded": true
-    };
-
-    const story = new NEWSBLUR.Models.Story(attributes);
-
-    return story;
+    return new NEWSBLUR.Models.Story(story_data.attributes);
 }
 
 async function parse_rss(url) {
@@ -136,6 +101,20 @@ async function get_local_feeds_from_storage() {
     return promise;
 }
 
+async function get_stories(feed_id) {
+    window.postMessage(
+        {
+            command: "get_stories",
+            feed_id: feed_id,
+        },
+        "*",
+    );
+
+    let { promise, resolve, reject } = Promise.withResolvers();
+    message_resolvers.set("stories", resolve);
+    return promise;
+}
+
 function add_local_feed_to_storage(feed) {
     const folder_names = feed.folders.map(folder => folder.get("folder_title").toLowerCase());
     window.postMessage(
@@ -158,12 +137,7 @@ async function load_local_feeds() {
 }
 
 async function load_local_feed(feed_id) {
-    const feed = await get_local_feed_from_storage(feed_id);
-    const rss_address = feed.get("feed_address");
-
-    const rss_data = await parse_rss(rss_address);
-
-    const stories = rss_data.items.map(create_story);
+    const stories = await get_stories(feed_id);
     NEWSBLUR.assets.stories.reset(stories, { added: stories.length });
 }
 
