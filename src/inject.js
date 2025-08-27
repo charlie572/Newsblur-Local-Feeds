@@ -59,8 +59,9 @@ function create_story_hash(story_rss_data) {
 }
 
 function create_story_data(story_rss_data) {
+    const story_hash = create_story_hash(story_rss_data)
     const attributes = {
-        "story_hash": create_story_hash(story_rss_data),
+        "story_hash": story_hash,
         "story_tags": [],
         "story_date": get_date_string(story_rss_data.pubDate),
         "story_timestamp": Date.parse(story_rss_data.pubDate),
@@ -78,7 +79,7 @@ function create_story_data(story_rss_data) {
         "share_count": null,
         "share_user_ids": [],
         "guid_hash": null,
-        "id": null,
+        "id": story_hash,
         "friend_comments": [],
         "friend_shares": [],
         "public_comments": [],
