@@ -96,16 +96,37 @@ function create_story_data(story_rss_data) {
 
 async function get_stories(feed_id) {
     const feed_data = await get_feed_from_storage(feed_id);
+
+    /* fetch rss feed */
     const rss_url = feed_data.attributes.feed_address;
     const rss_data = await parse_rss(rss_url);
-    const story_data = rss_data.items.map(create_story_data);
+
+    /* get all story data in browser */
+    const result = await browser.storage.local.get("local_stories");
+    var story_data = result.local_stories[feed_id] || [];
+
+    /* create lookup table of stories by link */
+    const story_data_by_link = {};
+    for (var data of story_data) {
+        story_data_by_link[data.permalink] = data;
+    }
+
+    /* create stories that aren't in browser storage yet */
+    story_data = rss_data.items.map(item =>
+        story_data_by_link[item.link] || create_story_data(item)
+    );
+
+    /* save stories to browser storage */
+    result.local_stories[feed_id] = story_data;
+    await browser.storage.local.set({local_stories: result.local_stories});
+
     return story_data;
 }
 
 async function get_feed_from_storage(feed_id) {
-    const result = await browser.storage.sync.get("local_feeds");
+    const result = await browser.storage.local.get("local_feeds");
     const feeds = result.local_feeds;
-    return feeds[String(feed_id)];
+    return feeds[feed_id];
 }
 
 const newsblur_origin = "https://www.newsblur.com";
@@ -132,7 +153,7 @@ window.addEventListener(
                 })
             );
         } else if (event.data.command === "get_local_feeds") {
-            browser.storage.sync.get("local_feeds").then(result => {
+            browser.storage.local.get("local_feeds").then(result => {
                 const feed_data = result.local_feeds;
                 event.source.postMessage({
                     command: "local_feeds",
@@ -147,26 +168,22 @@ window.addEventListener(
                 })
             );
         } else if (event.data.command === "add_local_feed") {
-            browser.storage.sync.get("local_feeds").then(result => {
+            browser.storage.local.get("local_feeds").then(result => {
                 const feeds = result.local_feeds;
                 const feed_data = event.data.feed_data;
                 feeds[feed_data.attributes.id] = feed_data;
-                browser.storage.sync.set({local_feeds: feeds});
+                browser.storage.local.set({local_feeds: feeds});
             });
         }
     }
 );
 
 async function setup_storage() {
-    // check if local_feeds is defined in browser storage
-    const result = await browser.storage.sync.get("local_feeds");
-    if ("local_feeds" in result) {
-        return
-    }
+    const result = await browser.storage.local.get(["local_feeds", "local_stories"]);
 
-    // initialise local storage
-    browser.storage.sync.set({
-        local_feeds: {}
+    browser.storage.local.set({
+        local_feeds: result.local_feeds || {},
+        local_stories: result.stories || {},
     });
 }
 setup_storage();

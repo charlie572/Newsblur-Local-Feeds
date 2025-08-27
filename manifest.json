@@ -12,7 +12,8 @@
 
 	"permissions": [
 		"*://localhost/*",
-		"storage"
+		"storage",
+		"unlimitedStorage"
 	],
 
 	"browser_specific_settings": {
