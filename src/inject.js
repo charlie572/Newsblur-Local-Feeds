@@ -130,8 +130,8 @@ async function get_story_by_hash(story_hash) {
     const result = await browser.storage.local.get("local_stories");
     const story_data = result.local_stories;
 
-    for (feed_id in story_data) {
-        for (data of story_data[feed_id]) {
+    for (var feed_id in story_data) {
+        for (var data of story_data[feed_id]) {
             if (data.story_hash === story_hash) {
                 return data;
             }
