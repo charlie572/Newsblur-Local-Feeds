@@ -6,22 +6,6 @@
 import * as messages from "./messages.js";
 import * as models from "./models.js";
 
-function get_date_string(date) {
-    return (
-        date.getFullYear()
-        + "-"
-        + date.getMonth()
-        + "-"
-        + date.getDate()
-        + " "
-        + date.getHours()
-        + ":"
-        + date.getMinutes()
-        + ":"
-        + date.getSeconds()
-    );
-}
-
 async function load_local_feeds() {
     const feeds = await messages.get_local_feeds_from_storage();
     for (var id in feeds) {
