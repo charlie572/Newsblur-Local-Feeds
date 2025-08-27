@@ -1,4 +1,4 @@
-import js from "./insert_local_feeds.js"
+import js from "../injected_dist/insert_local_feeds.js"
 import hash from "object-hash"
 
 function get_date_string(date) {
