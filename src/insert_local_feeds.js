@@ -36,6 +36,11 @@ window.addEventListener(
             const stories = story_data.map(data => create_story(data));
             message_resolvers.get("stories")(stories);
             message_resolvers.delete("stories");
+        } else if (event.data.command === "story") {
+            const story_data = event.data.story_data;
+            const story = create_story(data);
+            message_resolvers.get("story")(story);
+            message_resolvers.delete("story");
         }
     }
 );
@@ -113,6 +118,34 @@ async function get_stories(feed_id) {
     let { promise, resolve, reject } = Promise.withResolvers();
     message_resolvers.set("stories", resolve);
     return promise;
+}
+
+async function get_story_by_hash(hash) {
+    window.postMessage(
+        {
+            command: "get_story_by_hash",
+            feed_data: {
+                hash: hash,
+            },
+        },
+        "*",
+    );
+
+    let { promise, resolve, reject } = Promise.withResolvers();
+    message_resolvers.set("story", resolve);
+    return promise;
+}
+
+function set_story(story) {
+    window.postMessage(
+        {
+            command: "set_story",
+            story_data: {
+                attributes: story.attributes,
+            }
+        },
+        "*",
+    );
 }
 
 function add_local_feed_to_storage(feed) {
@@ -231,8 +264,22 @@ function add_feed_to_document(feed) {
     }
 }
 
+function mark_story_as_read(story, read) {
+    story.set("read_status", read ? 1 : 0);
+    set_story(story);
+}
+
+async function mark_story_id_as_read(story_id, read) {
+    const story = await get_story_by_hash(story_id);
+    mark_story_as_read(story, read);
+}
+
 function main() {
-    /* override load_feed method */
+    /* 
+     * Override NESBLUR.AssetModel methods, redirecting them to 
+     * other methods if arguments are for local feeds.
+     */
+
     const load_feed = NEWSBLUR.AssetModel.prototype.load_feed;
     NEWSBLUR.AssetModel.prototype.load_feed = function (feed_id, page, first_load, callback, error_callback) {
         if (feed_id < 0) {
@@ -241,6 +288,24 @@ function main() {
             load_feed.call(
                 NEWSBLUR.assets, feed_id, page, first_load, callback, error_callback
             );
+        }
+    };
+
+    const mark_story_hash_as_read = NEWSBLUR.AssetModel.prototype.mark_story_hash_as_read;
+    NEWSBLUR.AssetModel.prototype.mark_story_hash_as_read = function(story, callback, error_callback, data) {
+        if (story.get("story_hash").startsWith("local_story_")) {
+            mark_story_as_read(story, true);
+        } else {
+            mark_story_hash_as_read(story, callback, error_callback, data);
+        }
+    };
+
+    const mark_story_as_unread = NEWSBLUR.AssetModel.prototype.mark_story_as_unread;
+    NEWSBLUR.AssetModel.prototype.mark_story_as_unread = function(story_id, feed_id, callback, error_callback) {
+        if (story_id.startsWith("local_story_")) {
+            mark_story_id_as_read(story_id, false);
+        } else {
+            mark_story_as_unread(story_id, feed_id, callback, error_callback);
         }
     };
 
