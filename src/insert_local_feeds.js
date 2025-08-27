@@ -3,47 +3,8 @@
  * injected into newsblur. Use multi-line comments instead.
  */
 
-const message_resolvers = new Map();
-const newsblur_origin = "https://www.newsblur.com";
-window.addEventListener(
-    "message",
-    event => {
-        if (event.origin !== newsblur_origin) {
-            return;
-        }
-
-        if (event.data.command === "rss_result") {
-            message_resolvers.get("rss_result")(event.data.rss);
-            message_resolvers.delete("rss_result");
-        } else if (event.data.command === "local_feed") {
-            const feed_data = event.data.feed_data;
-            const feed = create_feed(feed_data.attributes, feed_data.folders);
-            message_resolvers.get("local_feed")(feed);
-            message_resolvers.delete("local_feed");
-        } else if (event.data.command === "local_feeds") {
-            const feed_data = event.data.feed_data;
-            const feeds = {};
-            for (var id in feed_data) {
-                feeds[id] = create_feed(
-                    feed_data[id].attributes, 
-                    feed_data[id].folders,
-                );
-            }
-            message_resolvers.get("local_feeds")(feeds);
-            message_resolvers.delete("local_feeds");
-        } else if (event.data.command === "stories") {
-            const story_data = event.data.story_data;
-            const stories = story_data.map(data => create_story(data));
-            message_resolvers.get("stories")(stories);
-            message_resolvers.delete("stories");
-        } else if (event.data.command === "story") {
-            const story_data = event.data.story_data;
-            const story = create_story(data);
-            message_resolvers.get("story")(story);
-            message_resolvers.delete("story");
-        }
-    }
-);
+import * as messages from "./messages.js";
+import * as models from "./models.js";
 
 function get_date_string(date) {
     return (
@@ -61,141 +22,20 @@ function get_date_string(date) {
     );
 }
 
-function create_story(story_data) {
-    return new NEWSBLUR.Models.Story(story_data.attributes);
-}
-
-async function parse_rss(url) {
-    window.postMessage(
-        {
-            command: "parse_rss",
-            url: url,
-        },
-        "*",
-    );
-
-    let { promise, resolve, reject } = Promise.withResolvers();
-    message_resolvers.set("rss_result", resolve);
-    return promise;
-}
-
-async function get_local_feed_from_storage(feed_id) {
-    window.postMessage(
-        {
-            command: "get_local_feed",
-            feed_id: feed_id,
-        },
-        "*",
-    );
-
-    let { promise, resolve, reject } = Promise.withResolvers();
-    message_resolvers.set("local_feed", resolve);
-    return promise;
-}
-
-async function get_local_feeds_from_storage() {
-    window.postMessage(
-        {
-            command: "get_local_feeds",
-        },
-        "*",
-    );
-
-    let { promise, resolve, reject } = Promise.withResolvers();
-    message_resolvers.set("local_feeds", resolve);
-    return promise;
-}
-
-async function get_stories(feed_id) {
-    window.postMessage(
-        {
-            command: "get_stories",
-            feed_id: feed_id,
-        },
-        "*",
-    );
-
-    let { promise, resolve, reject } = Promise.withResolvers();
-    message_resolvers.set("stories", resolve);
-    return promise;
-}
-
-async function get_story_by_hash(hash) {
-    window.postMessage(
-        {
-            command: "get_story_by_hash",
-            feed_data: {
-                hash: hash,
-            },
-        },
-        "*",
-    );
-
-    let { promise, resolve, reject } = Promise.withResolvers();
-    message_resolvers.set("story", resolve);
-    return promise;
-}
-
-function set_story(story) {
-    const attributes = {};
-    Object.assign(attributes, story.attributes);
-    delete attributes.selected;
-    delete attributes.images_loaded;
-    delete attributes.visible;
-    delete attributes.share_user_ids;
-
-    window.postMessage(
-        {
-            command: "set_story",
-            story_data: {
-                attributes: attributes,
-            }
-        },
-        "*",
-    );
-}
-
-function add_local_feed_to_storage(feed) {
-    const folder_names = feed.folders.map(folder => folder.get("folder_title").toLowerCase());
-    window.postMessage(
-        {
-            command: "add_local_feed",
-            feed_data: {
-                attributes: feed.attributes,
-                folders: folder_names,
-            },
-        },
-        "*",
-    );
-}
-
 async function load_local_feeds() {
-    const feeds = await get_local_feeds_from_storage();
+    const feeds = await messages.get_local_feeds_from_storage();
     for (var id in feeds) {
         add_feed_to_document(feeds[id]);
     }
 }
 
 async function load_local_feed(feed_id) {
-    const stories = await get_stories(feed_id);
+    const stories = await messages.get_stories(feed_id);
     NEWSBLUR.assets.stories.reset(stories, { added: stories.length });
 }
 
-function create_feed(attributes, folders) {
-    const feed = new NEWSBLUR.Models.Feed(attributes);
-
-    /* 
-     * In Newsblur, feed.folders doesn't seem to contain NEWSBLUR.Models.Folder
-     * objects. It seems to contain the result of an AJAX request instead. I'm 
-     * just going to use Folder objects though. I can't see how to construct
-     * the proper objects.
-     */
-    feed.folders = folders.map(name => NEWSBLUR.assets.folders.find_folder(name));
-    return feed;
-}
-
 async function add_local_feed(rss_url, folder_name) {
-    rss_data = await parse_rss(rss_url);
+    rss_data = await messages.parse_rss(rss_url);
 
     /* new feed data */
     const feed_id = -1;
@@ -245,9 +85,9 @@ async function add_local_feed(rss_url, folder_name) {
     const folder = NEWSBLUR.assets.folders.find_folder(folder_name);
 
     /* create feed model instance */
-    const feed = create_feed(feed_attributes, [folder_name]);
+    const feed = models.create_feed(feed_attributes, [folder_name]);
 
-    add_local_feed_to_storage(feed);
+    messages.add_local_feed_to_storage(feed);
 
     add_feed_to_document(feed)
 }
@@ -273,7 +113,7 @@ function add_feed_to_document(feed) {
 
 function mark_story_as_read(story, read) {
     story.set("read_status", read ? 1 : 0);
-    set_story(story);
+    messages.set_story(story);
 }
 
 async function mark_story_id_as_read(story_id, read) {
@@ -282,6 +122,8 @@ async function mark_story_id_as_read(story_id, read) {
 }
 
 function main() {
+    console.log("Messages:", messages);
+
     /* 
      * Override NESBLUR.AssetModel methods, redirecting them to 
      * other methods if arguments are for local feeds.
