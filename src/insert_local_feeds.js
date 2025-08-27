@@ -277,7 +277,7 @@ function mark_story_as_read(story, read) {
 }
 
 async function mark_story_id_as_read(story_id, read) {
-    const story = await get_story_by_hash(story_id);
+    const story = NEWSBLUR.assets.stories.get(story_id);
     mark_story_as_read(story, read);
 }
 
