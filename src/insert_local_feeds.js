@@ -19,7 +19,7 @@ async function load_local_feed(feed_id) {
 }
 
 async function add_local_feed(rss_url, folder_name) {
-    rss_data = await messages.parse_rss(rss_url);
+    const rss_data = await messages.parse_rss(rss_url);
 
     /* new feed data */
     const feed_id = -1;
@@ -41,10 +41,8 @@ async function add_local_feed(rss_url, folder_name) {
         "subs": 28,
         "is_push": true,
         "is_newsletter": false,
-        "fetched_once": true,
         "search_indexed": true,
         "discover_indexed": true,
-        "not_yet_fetched": false,
         "favicon_color": "ff184a",
         "favicon_fade": "ff3668",
         "favicon_border": "bf1237",
@@ -53,15 +51,12 @@ async function add_local_feed(rss_url, folder_name) {
         "favicon_url": rss_data.image_url,
         "s3_page": false,
         "s3_icon": true,
-        "disabled_page": false,
         "similar_feeds": [],
         "ps": 0,
         "nt": 2,
         "ng": 0,
-        "active": true,
         "feed_opens": 4,
         "subscribed": true,
-        "selected": false
     };
 
     /* get folder */
