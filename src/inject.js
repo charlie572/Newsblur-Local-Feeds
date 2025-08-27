@@ -1,4 +1,5 @@
 import js from "./insert_local_feeds.js"
+import hash from "object-hash"
 
 function get_date_string(date) {
     return (
@@ -53,9 +54,13 @@ async function parse_rss(url) {
     };
 }
 
+function create_story_hash(story_rss_data) {
+    return "local_story_" + hash(story_rss_data)
+}
+
 function create_story_data(story_rss_data) {
     const attributes = {
-        "story_hash": null,
+        "story_hash": create_story_hash(story_rss_data),
         "story_tags": [],
         "story_date": get_date_string(story_rss_data.pubDate),
         "story_timestamp": Date.parse(story_rss_data.pubDate),
@@ -73,7 +78,7 @@ function create_story_data(story_rss_data) {
         "share_count": null,
         "share_user_ids": [],
         "guid_hash": null,
-        "id": story_rss_data.link,
+        "id": null,
         "friend_comments": [],
         "friend_shares": [],
         "public_comments": [],
@@ -105,15 +110,15 @@ async function get_stories(feed_id) {
     const result = await browser.storage.local.get("local_stories");
     var story_data = result.local_stories[feed_id] || [];
 
-    /* create lookup table of stories by link */
-    const story_data_by_link = {};
+    /* create lookup table of stories by hash */
+    const story_data_by_hash = {};
     for (var data of story_data) {
-        story_data_by_link[data.permalink] = data;
+        story_data_by_hash[data.story_hash] = data;
     }
 
     /* create stories that aren't in browser storage yet */
     story_data = rss_data.items.map(item =>
-        story_data_by_link[item.link] || create_story_data(item)
+        story_data_by_hash[create_story_hash(item)] || create_story_data(item)
     );
 
     /* save stories to browser storage */
