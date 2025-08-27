@@ -73,12 +73,10 @@ function create_story_data(story_rss_data) {
         "secure_image_urls": {},
         "secure_image_thumbnails": {},
         "story_feed_id": null,
-        "has_modifications": false,
         "comment_count": null,
         "comment_user_ids": [],
         "share_count": null,
         "share_user_ids": [],
-        "guid_hash": null,
         "id": story_hash,
         "friend_comments": [],
         "friend_shares": [],
@@ -94,8 +92,6 @@ function create_story_data(story_rss_data) {
             "title": 0
         },
         "score": 1,
-        "visible": true,
-        "images_loaded": true
     };
     return {attributes};
 }

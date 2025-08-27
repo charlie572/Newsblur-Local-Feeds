@@ -137,11 +137,18 @@ async function get_story_by_hash(hash) {
 }
 
 function set_story(story) {
+    const attributes = {};
+    Object.assign(attributes, story.attributes);
+    delete attributes.selected;
+    delete attributes.images_loaded;
+    delete attributes.visible;
+    delete attributes.share_user_ids;
+
     window.postMessage(
         {
             command: "set_story",
             story_data: {
-                attributes: story.attributes,
+                attributes: attributes,
             }
         },
         "*",
@@ -296,7 +303,7 @@ function main() {
         if (story.get("story_hash").startsWith("local_story_")) {
             mark_story_as_read(story, true);
         } else {
-            mark_story_hash_as_read(story, callback, error_callback, data);
+            mark_story_hash_as_read.call(NEWSBLUR.assets, story, callback, error_callback, data);
         }
     };
 
@@ -305,7 +312,7 @@ function main() {
         if (story_id.startsWith("local_story_")) {
             mark_story_id_as_read(story_id, false);
         } else {
-            mark_story_as_unread(story_id, feed_id, callback, error_callback);
+            mark_story_as_unread.call(NEWSBLUR.assets, story_id, feed_id, callback, error_callback);
         }
     };
 
