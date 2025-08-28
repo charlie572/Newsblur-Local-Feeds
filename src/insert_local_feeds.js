@@ -5,6 +5,8 @@
 
 import * as messages from "./messages.js";
 import * as models from "./models.js";
+import hash from "object-hash";
+import { is_string } from "./utils.js";
 
 async function load_local_feeds() {
     const feeds = await messages.get_local_feeds_from_storage();
@@ -18,13 +20,16 @@ async function load_local_feed(feed_id) {
     NEWSBLUR.assets.stories.reset(stories, { added: stories.length });
 }
 
+function create_feed_id(rss_url) {
+    return "local_feed_" + hash(rss_url);
+}
+
 async function add_local_feed(rss_url, folder_name) {
     const rss_data = await messages.parse_rss(rss_url);
 
     /* new feed data */
-    const feed_id = -1;
     const feed_attributes = {
-        "id": feed_id,
+        "id": create_feed_id(rss_url),
         "feed_title": rss_data.title,
         "feed_address": rss_url,
         "feed_link": rss_data.link,
@@ -101,8 +106,6 @@ async function mark_story_id_as_read(story_id, read) {
 }
 
 function main() {
-    console.log("Messages:", messages);
-
     /* 
      * Override NESBLUR.AssetModel methods, redirecting them to 
      * other methods if arguments are for local feeds.
@@ -110,7 +113,7 @@ function main() {
 
     const load_feed = NEWSBLUR.AssetModel.prototype.load_feed;
     NEWSBLUR.AssetModel.prototype.load_feed = function (feed_id, page, first_load, callback, error_callback) {
-        if (feed_id < 0) {
+        if (is_string(feed_id) && feed_id.startsWith("local_feed_")) {
             load_local_feed(feed_id);
         } else {
             load_feed.call(
