@@ -7,7 +7,13 @@ export function create_feed(attributes, folders) {
      * just going to use Folder objects though. I can't see how to construct
      * the proper objects.
      */
-    feed.folders = folders.map(name => NEWSBLUR.assets.folders.find_folder(name));
+    feed.folders = folders.map(name => {
+        if (name === "") {
+            return NEWSBLUR.assets.folders;
+        } else {
+            return NEWSBLUR.assets.folders.find_folder(name);
+        }
+    });
 
     return feed;
 }

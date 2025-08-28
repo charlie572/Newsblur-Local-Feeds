@@ -64,11 +64,8 @@ async function add_local_feed(rss_url, folder_name) {
         "subscribed": true,
     };
 
-    /* get folder */
-    folder_name = folder_name.split(":")[1].toLowerCase();
-    const folder = NEWSBLUR.assets.folders.find_folder(folder_name);
-
     /* create feed model instance */
+    folder_name = folder_name.split(":")[1].toLowerCase();
     const feed = models.create_feed(feed_attributes, [folder_name]);
 
     messages.add_local_feed_to_storage(feed);
@@ -78,20 +75,28 @@ async function add_local_feed(rss_url, folder_name) {
 
 function add_feed_to_document(feed) {
     for (var folder of feed.folders) {
+        /* check if this folder is the root folder */
+        const root = "options" in folder;
+
         /* create feed view */
-        const depth = folder.folder_view.options.depth;
         const view = new NEWSBLUR.Views.FeedTitleView({
             model: feed,
             type: 'feed',
-            depth: depth,
-            folder_title: folder.get("folder_title"),
+            depth: root ? 0 : folder.folder_view.options.depth,
+            folder_title: root ? "" : folder.get("folder_title"),
             folder: folder,
         }).render();
         feed.views.push(view);
 
         /* add feed view to document */
-        const folder_element = folder.folder_view.el.querySelector(".folder");
-        folder_element.appendChild(view.el);
+        if (root) {
+            const parent_element = document.querySelector(".NB-root");
+            const first_child = parent_element.childNodes[0];
+            parent_element.insertBefore(view.el, first_child);
+        } else {
+            const parent_element = folder.folder_view.el.querySelector(".folder");
+            parent_element.appendChild(view.el);
+        }
     }
 }
 
