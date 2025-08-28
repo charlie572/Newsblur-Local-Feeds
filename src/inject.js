@@ -1,22 +1,6 @@
 import js from "../injected_dist/insert_local_feeds.js"
 import hash from "object-hash"
 
-function get_date_string(date) {
-    return (
-        date.getFullYear()
-        + "-"
-        + String(date.getMonth()).padStart(2, "0")
-        + "-"
-        + String(date.getDate()).padStart(2, "0")
-        + " "
-        + String(date.getHours()).padStart(2, "0")
-        + ":"
-        + String(date.getMinutes()).padStart(2, "0")
-        + ":"
-        + String(date.getSeconds()).padStart(2, "0")
-    );
-}
-
 async function parse_rss(url) {
     const response = await fetch(url);
     if (!response.ok) {
@@ -31,17 +15,35 @@ async function parse_rss(url) {
     const title = xml.querySelector("title").textContent;
     const link = xml.querySelector("link").textContent;
     const description = xml.querySelector("description").textContent;
-    const image_url = xml.querySelector("url").textContent;
+
+    var image_url = null;
+    const image_element = xml.querySelector("image url");
+    if (image_element) {
+        image_url = image_element.textContent;
+    }
 
     const item_elements = xml.querySelectorAll("item");
     const items = [];
     for (const item of item_elements) {
+        /* get categories */
+        var categories = Array.from(item.querySelectorAll("category"));
+        categories = categories.map(cat => cat.textContent);
+
+        /* get content */
+        var content = null;
+        const content_element = item.getElementsByTagName("content:encoded");
+        if (content_element) {
+            content = content_element.textContent;
+        }
+
         items.push({
             title: item.querySelector("title").textContent,
             description: item.querySelector("description").textContent,
             link: item.querySelector("link").textContent,
             pubDate: new Date(item.querySelector("pubDate").textContent),
             author: item.querySelector("author").textContent,
+            categories: categories,
+            content: content,
         });
     }
 
@@ -62,12 +64,11 @@ function create_story_data(story_rss_data) {
     const story_hash = create_story_hash(story_rss_data);
     const attributes = {
         "story_hash": story_hash,
-        "story_tags": [],
-        "story_date": get_date_string(story_rss_data.pubDate),
+        "story_tags": story_rss_data.categories,
         "story_timestamp": Math.floor(Date.parse(story_rss_data.pubDate) / 1000),
         "story_authors": story_rss_data.author,
         "story_title": story_rss_data.title,
-        "story_content": null,
+        "story_content": story_rss_data.content,
         "story_permalink": story_rss_data.link,
         "image_urls": [],
         "secure_image_urls": {},
@@ -82,8 +83,6 @@ function create_story_data(story_rss_data) {
         "friend_shares": [],
         "public_comments": [],
         "reply_count": 0,
-        "short_parsed_date": null,
-        "long_parsed_date": null,
         "read_status": 0,
         "intelligence": {
             "feed": 1,
@@ -232,7 +231,7 @@ async function setup_storage() {
         local_stories: result.local_stories || {},
     });
 }
-browser.storage.local.clear().then(setup_storage);
+setup_storage();
 
 var script = document.createElement("script");
 script.innerText = js;
