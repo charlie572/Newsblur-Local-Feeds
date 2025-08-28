@@ -5,15 +5,15 @@ function get_date_string(date) {
     return (
         date.getFullYear()
         + "-"
-        + date.getMonth()
+        + String(date.getMonth()).padStart(2, "0")
         + "-"
-        + date.getDate()
+        + String(date.getDate()).padStart(2, "0")
         + " "
-        + date.getHours()
+        + String(date.getHours()).padStart(2, "0")
         + ":"
-        + date.getMinutes()
+        + String(date.getMinutes()).padStart(2, "0")
         + ":"
-        + date.getSeconds()
+        + String(date.getSeconds()).padStart(2, "0")
     );
 }
 
@@ -64,7 +64,7 @@ function create_story_data(story_rss_data) {
         "story_hash": story_hash,
         "story_tags": [],
         "story_date": get_date_string(story_rss_data.pubDate),
-        "story_timestamp": Date.parse(story_rss_data.pubDate),
+        "story_timestamp": Math.floor(Date.parse(story_rss_data.pubDate) / 1000),
         "story_authors": story_rss_data.author,
         "story_title": story_rss_data.title,
         "story_content": null,
@@ -232,7 +232,7 @@ async function setup_storage() {
         local_stories: result.local_stories || {},
     });
 }
-setup_storage();
+browser.storage.local.clear().then(setup_storage);
 
 var script = document.createElement("script");
 script.innerText = js;
