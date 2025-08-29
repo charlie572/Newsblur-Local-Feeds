@@ -178,6 +178,25 @@ async function set_feed_folders(feed_id, folders) {
     await browser.storage.local.set(result);
 }
 
+async function delete_feed_in_folder(feed_id, folder) {
+    const result = await browser.storage.local.get("local_feeds");
+    const folders = result.local_feeds[feed_id].folders;
+    
+    // delete folder from array
+    const index = folders.findIndex(
+        name => name.toLowerCase() === folder.toLowerCase()
+    );
+    if (index >= 0) {
+        folders.splice(index);
+    }
+
+    if (folders.length == 0) {
+        delete result.local_feeds[feed_id];
+    }
+
+    await browser.storage.local.set(result);
+}
+
 const newsblur_origin = "https://www.newsblur.com";
 window.addEventListener(
     "message",
@@ -241,6 +260,8 @@ window.addEventListener(
             );
         } else if (event.data.command === "set_feed_folders") {
             set_feed_folders(event.data.feed_id, event.data.folders);
+        } else if (event.data.command === "delete_feed_in_folder") {
+            delete_feed_in_folder(event.data.feed_id, event.data.folder);
         }
     }
 );

@@ -155,3 +155,14 @@ export function set_feed_folders_in_storage(feed_id, folders) {
         "*",
     );
 }
+
+export function delete_feed_in_folder(feed_id, folder) {
+    window.postMessage(
+        {
+            command: "delete_feed_in_folder",
+            feed_id: feed_id,
+            folder: folder,
+        },
+        "*",
+    );
+}
