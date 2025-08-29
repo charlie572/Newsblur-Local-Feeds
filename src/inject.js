@@ -239,7 +239,11 @@ window.addEventListener(
 );
 
 async function setup_storage() {
-    const result = await browser.storage.local.get(["local_feeds", "local_stories"]);
+    const result = await browser.storage.local.get([
+        "local_feeds", 
+        "local_stories", 
+        "next_feed_id",
+    ]);
 
     browser.storage.local.set({
         local_feeds: result.local_feeds || {},
