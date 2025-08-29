@@ -1,5 +1,3 @@
-import * as models from "./models.js";
-
 const message_resolvers = new Map();
 const newsblur_origin = "https://www.newsblur.com";
 window.addEventListener(
@@ -16,15 +14,7 @@ window.addEventListener(
             message_resolvers.get("local_feed")(event.data.feed_data);
             message_resolvers.delete("local_feed");
         } else if (event.data.command === "local_feeds") {
-            const feed_data = event.data.feed_data;
-            const feeds = {};
-            for (var id in feed_data) {
-                feeds[id] = models.create_feed(
-                    feed_data[id].attributes, 
-                    feed_data[id].folders,
-                );
-            }
-            message_resolvers.get("local_feeds")(feeds);
+            message_resolvers.get("local_feeds")(event.data.feed_data);
             message_resolvers.delete("local_feeds");
         } else if (event.data.command === "stories") {
             message_resolvers.get("stories")(event.data.story_data);

@@ -8,11 +8,26 @@ import * as models from "./models.js";
 import hash from "object-hash";
 import { is_string } from "./utils.js";
 
-async function load_local_feeds() {
-    const feeds = await messages.get_local_feeds_from_storage();
-    for (var id in feeds) {
-        add_feed_to_document(feeds[id]);
+async function fetch_local_feeds(feeds, subscriptions) {
+    const feed_data = await messages.get_local_feeds_from_storage();
+
+    for (var id in feed_data) {
+        /* feed object */
+        const feed = models.create_feed(
+            feed_data[id].attributes, 
+            feed_data[id].folders,
+        );
+        NEWSBLUR.assets.feeds.add(feed);
+
+        /* feed data to return from feeds.fetch() */
+        const feed_data_nb = {};
+        Object.assign(feed_data_nb, feed_data[id].attributes);
+        delete feed_data_nb.id;
+        feed_data_nb.feed_id = id;
+        feeds.push(feed_data_nb);
     }
+
+    return {feeds, subscriptions};
 }
 
 async function load_local_feed(feed_id, page, first_load, callback, error_callback) {
@@ -125,6 +140,18 @@ function main() {
      * other methods if arguments are for local feeds.
      */
 
+    const fetch_feeds = NEWSBLUR.Collections.Feeds.prototype.fetch;
+    NEWSBLUR.Collections.Feeds.prototype.fetch = function (options) {
+        const callback = options.success;
+        options.success = (feeds, subscriptions) => (
+            fetch_local_feeds(feeds, subscriptions)
+            .then(result => {
+                callback(result.feeds, result.subscriptions)
+            })
+        );
+        fetch_feeds.call(NEWSBLUR.assets.feeds, options);
+    };
+
     const load_feed = NEWSBLUR.AssetModel.prototype.load_feed;
     NEWSBLUR.AssetModel.prototype.load_feed = function (feed_id, page, first_load, callback, error_callback) {
         if (feed_id < 0) {
@@ -172,8 +199,6 @@ function main() {
         const add_site_group = this.el.querySelector(".NB-add-site");
         add_site_group.appendChild(button);
     };
-
-    setTimeout(load_local_feeds, 2000);
 }
 
 main();
