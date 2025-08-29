@@ -1,8 +1,3 @@
-/* 
- * WARNING: single-line comments don't work in this script when it is 
- * injected into newsblur. Use multi-line comments instead.
- */
-
 import * as messages from "./messages.js";
 import * as models from "./models.js";
 import hash from "object-hash";
@@ -11,23 +6,53 @@ import { is_string } from "./utils.js";
 async function fetch_local_feeds(feeds, subscriptions) {
     const feed_data = await messages.get_local_feeds_from_storage();
 
-    for (var id in feed_data) {
+    for (const id in feed_data) {
         /* feed object */
-        const feed = models.create_feed(
-            feed_data[id].attributes, 
-            feed_data[id].folders,
-        );
+        const feed = new NEWSBLUR.Models.Feed(feed_data[id].attributes);
         NEWSBLUR.assets.feeds.add(feed);
 
         /* feed data to return from feeds.fetch() */
         const feed_data_nb = {};
         Object.assign(feed_data_nb, feed_data[id].attributes);
-        delete feed_data_nb.id;
-        feed_data_nb.feed_id = id;
         feeds.push(feed_data_nb);
+
+        /* folders */
+        for (const folder_name of feed_data[id].folders) {
+            const success = add_to_folder_tree(Number(id), folder_name, subscriptions.folders);
+            if (!success) throw new Error("Couldn't find folder. " + folder_name);
+        }
     }
 
     return {feeds, subscriptions};
+}
+
+/*
+ * Recursively search for target_folder_name (case-insensitive), and add feed_id to it.
+ */
+function add_to_folder_tree(feed_id, target_folder_name, folders) {
+    if (target_folder_name === "") {
+        folders.unshift(feed_id);
+        return true;
+    }
+
+    target_folder_name = target_folder_name.toLowerCase();
+
+    for (const item of folders) {
+        if (typeof item === "number") continue;
+
+        const folder_name = Object.keys(item)[0];
+        const elements = item[folder_name];
+
+        if (folder_name.toLowerCase() === target_folder_name) {
+            elements.push(feed_id);
+            return true;
+        } else {
+            const success = add_to_folder_tree(feed_id, target_folder_name, elements);
+            if (success) return true;
+        }
+    }
+
+    return false;
 }
 
 async function load_local_feed(feed_id, page, first_load, callback, error_callback) {
