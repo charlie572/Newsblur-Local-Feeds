@@ -28,6 +28,9 @@ window.addEventListener(
         } else if (event.data.command === "new_feed_id") {
             message_resolvers.get("new_feed_id")(event.data.new_feed_id);
             message_resolvers.delete("new_feed_id");
+        } else if (event.data.command === "feeds_trainer") {
+            message_resolvers.get("feeds_trainer")(event.data.feeds_trainer);
+            message_resolvers.delete("feeds_trainer");
         }
     }
 );
@@ -165,4 +168,18 @@ export function delete_feed_in_folder(feed_id, folder) {
         },
         "*",
     );
+}
+
+export function get_feeds_trainer(feed_id) {
+    window.postMessage(
+        {
+            command: "get_feeds_trainer",
+            feed_id: feed_id,
+        },
+        "*",
+    );
+
+    let { promise, resolve, reject } = Promise.withResolvers();
+    message_resolvers.set("feeds_trainer", resolve);
+    return promise;
 }

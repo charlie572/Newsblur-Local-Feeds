@@ -197,6 +197,43 @@ async function delete_feed_in_folder(feed_id, folder) {
     await browser.storage.local.set(result);
 }
 
+async function get_feeds_trainer(feed_id) {
+    const result = await browser.storage.local.get(
+        ["local_feeds_trainers", "local_stories"]
+    );
+
+    if (feed_id in result.local_feeds_trainers) {
+        return result.local_feeds_trainers[feed_id];
+    }
+
+    const stories = result.local_stories[feed_id];
+
+    const milliseconds_per_month = 1000 * 60 * 60 * 24 * 30;
+    const stories_last_month = stories.filter(s => Date.now() - s.story_timestamp * 1000 < milliseconds_per_month);
+
+    const trainer = {
+        classifiers: {
+            feeds: {},
+            authors: {},
+            titles: {},
+            tags: {},
+        },
+        feed_id: feed_id,
+        stories_last_month: stories_last_month.length,
+        num_subscribers: 1,
+        feed_tags: [],
+        feed_authors: [],
+    };
+
+    result.local_feeds_trainers[feed_id] = trainer;
+
+    await browser.storage.local.set(
+        {local_feeds_trainers: result.local_feeds_trainers}
+    );
+
+    return trainer;
+}
+
 const newsblur_origin = "https://www.newsblur.com";
 window.addEventListener(
     "message",
@@ -262,6 +299,13 @@ window.addEventListener(
             set_feed_folders(event.data.feed_id, event.data.folders);
         } else if (event.data.command === "delete_feed_in_folder") {
             delete_feed_in_folder(event.data.feed_id, event.data.folder);
+        } else if (event.data.command === "get_feeds_trainer") {
+            get_feeds_trainer(event.data.feed_id).then(feeds_trainer => {
+                event.source.postMessage({
+                    command: "feeds_trainer",
+                    feeds_trainer: feeds_trainer,
+                });
+            });
         }
     }
 );
@@ -270,12 +314,14 @@ async function setup_storage() {
     const result = await browser.storage.local.get([
         "local_feeds", 
         "local_stories", 
+        "local_feeds_trainers",
         "next_feed_id",
     ]);
 
     browser.storage.local.set({
         local_feeds: result.local_feeds || {},
         local_stories: result.local_stories || {},
+        local_feeds_trainers: result.local_feeds_trainers || {},
         next_feed_id: result.next_feed_id || -1,
     });
 }

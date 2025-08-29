@@ -219,6 +219,16 @@ function main() {
         }
     };
 
+    const get_feeds_trainer = NEWSBLUR.AssetModel.prototype.get_feeds_trainer;
+    NEWSBLUR.AssetModel.prototype.get_feeds_trainer = function(feed_id, callback) {
+        if (feed_id < 0) {
+            messages.get_feeds_trainer(feed_id)
+            .then(trainer => callback([trainer]));
+        } else {
+            get_feeds_trainer.call(NEWSBLUR.assets, feed_id, callback);
+        }
+    };
+
     const delete_feed = NEWSBLUR.AssetModel.prototype.delete_feed;
     NEWSBLUR.AssetModel.prototype.delete_feed = function(feed_id, in_folder, callback) {
         if (feed_id < 0) {
