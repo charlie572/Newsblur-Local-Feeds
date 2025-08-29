@@ -13,9 +13,7 @@ window.addEventListener(
             message_resolvers.get("rss_result")(event.data.rss);
             message_resolvers.delete("rss_result");
         } else if (event.data.command === "local_feed") {
-            const feed_data = event.data.feed_data;
-            const feed = models.create_feed(feed_data.attributes, feed_data.folders);
-            message_resolvers.get("local_feed")(feed);
+            message_resolvers.get("local_feed")(event.data.feed_data);
             message_resolvers.delete("local_feed");
         } else if (event.data.command === "local_feeds") {
             const feed_data = event.data.feed_data;
@@ -112,20 +110,6 @@ export async function get_story_by_hash(hash) {
 
     let { promise, resolve, reject } = Promise.withResolvers();
     message_resolvers.set("story", resolve);
-    return promise;
-}
-
-export async function get_feed_by_id(feed_id) {
-    window.postMessage(
-        {
-            command: "get_feed_by_id",
-            feed_id: feed_id,
-        },
-        "*",
-    );
-
-    let { promise, resolve, reject } = Promise.withResolvers();
-    message_resolvers.set("feed", resolve);
     return promise;
 }
 

@@ -16,7 +16,7 @@ async function load_local_feeds() {
 }
 
 async function load_local_feed(feed_id, page, first_load, callback, error_callback) {
-    const feed = await messages.get_feed_by_id(feed_id);
+    const feed = await messages.get_local_feed_from_storage(feed_id);
     const stories = await messages.get_stories(feed_id);
 
     const data = {};

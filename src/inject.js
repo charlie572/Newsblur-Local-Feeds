@@ -140,11 +140,6 @@ async function get_story_by_hash(story_hash) {
     throw new Error("Couldn't find story hash.");
 }
 
-async function get_feed_by_id(feed_id) {
-    const result = await browser.storage.local.get("local_feeds");
-    return result.local_feeds[feed_id];
-}
-
 async function set_story(data) {
     /* get all story data in browser */
     const result = await browser.storage.local.get("local_stories");
@@ -220,13 +215,6 @@ window.addEventListener(
                 event.source.postMessage({
                     command: "story",
                     story_data: story_data,
-                })
-            );
-        } else if (event.data.command === "get_feed_by_id") {
-            get_feed_by_id(event.data.feed_id).then(feed_data =>
-                event.source.postMessage({
-                    command: "feed",
-                    feed_data: feed_data,
                 })
             );
         } else if (event.data.command === "set_story") {
