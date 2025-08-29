@@ -144,3 +144,14 @@ export function add_local_feed_to_storage(feed_data) {
         "*",
     );
 }
+
+export function set_feed_folders_in_storage(feed_id, folders) {
+    window.postMessage(
+        {
+            command: "set_feed_folders",
+            feed_id: feed_id,
+            folders: folders,
+        },
+        "*",
+    );
+}

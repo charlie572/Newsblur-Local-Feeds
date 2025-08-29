@@ -179,7 +179,8 @@ function main() {
     const move_feed_to_folder = NEWSBLUR.AssetModel.prototype.move_feed_to_folder;
     NEWSBLUR.AssetModel.prototype.move_feed_to_folder = function(feed_id, in_folder, to_folder, callback) {
         if (feed_id < 0) {
-            
+            messages.set_feed_folders_in_storage(feed_id, [to_folder]);
+            NEWSBLUR.assets.load_feeds(callback);
         } else {
             move_feed_to_folder.call(NEWSBLUR.assets, feed_id, in_folder, to_folder, callback);
         }
@@ -188,7 +189,8 @@ function main() {
     const move_feed_to_folders = NEWSBLUR.AssetModel.prototype.move_feed_to_folders;
     NEWSBLUR.AssetModel.prototype.move_feed_to_folders = function(feed_id, in_folders, to_folders, callback) {
         if (feed_id < 0) {
-            
+            messages.set_feed_folders_in_storage(feed_id, to_folders);
+            NEWSBLUR.assets.load_feeds(callback);
         } else {
             move_feed_to_folder.call(NEWSBLUR.assets, feed_id, in_folders, to_folders, callback);
         }

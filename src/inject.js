@@ -172,6 +172,12 @@ async function get_new_feed_id() {
     return new_feed_id;
 }
 
+async function set_feed_folders(feed_id, folders) {
+    const result = await browser.storage.local.get("local_feeds");
+    result.local_feeds[feed_id].folders = folders;
+    await browser.storage.local.set(result);
+}
+
 const newsblur_origin = "https://www.newsblur.com";
 window.addEventListener(
     "message",
@@ -233,7 +239,8 @@ window.addEventListener(
                     new_feed_id: new_feed_id,
                 })
             );
-
+        } else if (event.data.command === "set_feed_folders") {
+            set_feed_folders(event.data.feed_id, event.data.folders);
         }
     }
 );
