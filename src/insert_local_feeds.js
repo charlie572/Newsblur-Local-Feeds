@@ -198,8 +198,25 @@ function main() {
 
     const move_feeds_by_folder = NEWSBLUR.AssetModel.prototype.move_feeds_by_folder;
     NEWSBLUR.AssetModel.prototype.move_feeds_by_folder = function(feeds_by_folder, to_folder, new_folder, callback, error_callback) {
+        // separate into local and non-local feeds
+        const local_feeds_by_folder = feeds_by_folder.filter(item => item[0] < 0);
         feeds_by_folder = feeds_by_folder.filter(item => item[0] >= 0);
-        move_feeds_by_folder.call(NEWSBLUR.assets, feeds_by_folder, to_folder, new_folder, callback, error_callback);
+
+        // move local feeds
+        var destination = new_folder || to_folder.split(":")[1].toLowerCase();
+        for (const item of local_feeds_by_folder) {
+            messages.set_feed_folders_in_storage(item[0], [destination]);
+        }
+
+        // Call NEWSBLUR.assets.load_feeds once all the feeds are moved.
+        const pre_callback = () => NEWSBLUR.assets.load_feeds(callback);
+
+        // move non-local feeds
+        if (feeds_by_folder.length > 0) {
+            move_feeds_by_folder.call(NEWSBLUR.assets, feeds_by_folder, to_folder, new_folder, pre_callback, error_callback);
+        } else {
+            pre_callback();
+        }
     };
 
     /* add button to ReaderAddFeed dialog */
