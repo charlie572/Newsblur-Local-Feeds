@@ -183,3 +183,13 @@ export function get_feeds_trainer(feed_id) {
     message_resolvers.set("feeds_trainer", resolve);
     return promise;
 }
+
+export function save_classifier(classifier_update) {
+    window.postMessage(
+        {
+            command: "save_classifier",
+            classifier_update: classifier_update,
+        },
+        "*",
+    );
+}

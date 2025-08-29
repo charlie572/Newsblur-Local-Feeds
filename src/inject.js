@@ -234,6 +234,57 @@ async function get_feeds_trainer(feed_id) {
     return trainer;
 }
 
+async function save_classifier(classifier_update) {
+    const result = await browser.storage.local.get("local_feeds_trainers");
+
+    const feed_id = classifier_update.feed_id;
+    const trainer = result.local_feeds_trainers[feed_id];
+
+    for (const update_key in classifier_update) {
+        if (update_key === "feed_id") continue;
+
+        // list of entities to update
+        const update_ents = classifier_update[update_key];
+
+        const update_key_split = update_key.split("_");
+
+        // check whether we are adding or removign rules
+        const remove = update_key_split[0] === "remove";
+
+        // unpack update key
+        // update_like is either "like" or "dislike". It says which one 
+        // the update targets.
+        // update_type is "author", "feed", "tag", or "title"
+        if (remove) update_key_split.shift();
+        const [update_like, update_type] = update_key_split;
+
+        // In the trainer, likes or dislikes are represented by 1 or -1.
+        const update_like_num = (update_like === "like") ? 1 : -1;
+
+        // get the trainer object for this update_type
+        // trainer_ents is an object of entities, with 
+        // the entity as its key, and 1 or -1 for its value, 
+        // to represent like or dislike.
+        const trainer_classifier_key = update_type + "s";
+        const trainer_ents = trainer.classifiers[trainer_classifier_key];
+
+        // Either add or remove rules.
+        if (remove) {
+            for (const trainer_ent in trainer_ents) {
+                if (update_ents.includes(trainer_ent)) {
+                    delete trainer_ents[trainer_ent];
+                }
+            }
+        } else {
+            for (const update_ent of update_ents) {
+                trainer_ents[update_ent] = update_like_num;
+            }
+        }
+    }
+
+    await browser.storage.local.set(result);
+}
+
 const newsblur_origin = "https://www.newsblur.com";
 window.addEventListener(
     "message",
@@ -306,6 +357,8 @@ window.addEventListener(
                     feeds_trainer: feeds_trainer,
                 });
             });
+        } else if (event.data.command === "save_classifier") {
+            save_classifier(event.data.classifier_update);
         }
     }
 );
