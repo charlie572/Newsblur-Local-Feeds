@@ -176,6 +176,30 @@ function main() {
         }
     };
 
+    const move_feed_to_folder = NEWSBLUR.AssetModel.prototype.move_feed_to_folder;
+    NEWSBLUR.AssetModel.prototype.move_feed_to_folder = function(feed_id, in_folder, to_folder, callback) {
+        if (feed_id < 0) {
+            
+        } else {
+            move_feed_to_folder.call(NEWSBLUR.assets, feed_id, in_folder, to_folder, callback);
+        }
+    };
+
+    const move_feed_to_folders = NEWSBLUR.AssetModel.prototype.move_feed_to_folders;
+    NEWSBLUR.AssetModel.prototype.move_feed_to_folders = function(feed_id, in_folders, to_folders, callback) {
+        if (feed_id < 0) {
+            
+        } else {
+            move_feed_to_folder.call(NEWSBLUR.assets, feed_id, in_folders, to_folders, callback);
+        }
+    };
+
+    const move_feeds_by_folder = NEWSBLUR.AssetModel.prototype.move_feeds_by_folder;
+    NEWSBLUR.AssetModel.prototype.move_feeds_by_folder = function(feeds_by_folder, to_folder, new_folder, callback, error_callback) {
+        feeds_by_folder = feeds_by_folder.filter(item => item[0] >= 0);
+        move_feeds_by_folder.call(NEWSBLUR.assets, feeds_by_folder, to_folder, new_folder, callback, error_callback);
+    };
+
     /* add button to ReaderAddFeed dialog */
     const render_reader_add_feed = NEWSBLUR.ReaderAddFeed.prototype.render;
     NEWSBLUR.ReaderAddFeed.prototype.render = function () {
