@@ -135,23 +135,11 @@ export function set_story(story) {
     );
 }
 
-export function add_local_feed_to_storage(feed) {
-    const folder_names = feed.folders.map(folder => {
-        if ("options" in folder) {
-            /* root folder */
-            return "";
-        } else {
-            return folder.get("folder_title").toLowerCase();
-        }
-    });
-
+export function add_local_feed_to_storage(feed_data) {
     window.postMessage(
         {
             command: "add_local_feed",
-            feed_data: {
-                attributes: feed.attributes,
-                folders: folder_names,
-            },
+            feed_data: feed_data,
         },
         "*",
     );
