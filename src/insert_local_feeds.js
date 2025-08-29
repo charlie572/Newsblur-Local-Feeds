@@ -58,8 +58,11 @@ async function add_local_feed(rss_url, folder_name) {
         "s3_icon": true,
         "similar_feeds": [],
         "ps": 0,
-        "nt": 2,
+        "nt": rss_data.items.length,
         "ng": 0,
+        "active": true,
+        "fetched_once": true,
+        "has_exception": false,
         "feed_opens": 4,
         "subscribed": true,
     };
@@ -67,6 +70,7 @@ async function add_local_feed(rss_url, folder_name) {
     /* create feed model instance */
     folder_name = folder_name.split(":")[1].toLowerCase();
     const feed = models.create_feed(feed_attributes, [folder_name]);
+    NEWSBLUR.assets.feeds.add(feed);
 
     messages.add_local_feed_to_storage(feed);
 
