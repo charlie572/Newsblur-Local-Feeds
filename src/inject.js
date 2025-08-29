@@ -140,6 +140,11 @@ async function get_story_by_hash(story_hash) {
     throw new Error("Couldn't find story hash.");
 }
 
+async function get_feed_by_id(feed_id) {
+    const result = await browser.storage.local.get("local_feeds");
+    return result.local_feeds[feed_id];
+}
+
 async function set_story(data) {
     /* get all story data in browser */
     const result = await browser.storage.local.get("local_stories");
@@ -163,6 +168,13 @@ async function get_feed_from_storage(feed_id) {
     const result = await browser.storage.local.get("local_feeds");
     const feeds = result.local_feeds;
     return feeds[feed_id];
+}
+
+async function get_new_feed_id() {
+    const result = await browser.storage.local.get("next_feed_id");
+    const new_feed_id = result.next_feed_id;
+    await browser.storage.local.set({next_feed_id: new_feed_id - 1});
+    return new_feed_id;
 }
 
 const newsblur_origin = "https://www.newsblur.com";
@@ -210,6 +222,13 @@ window.addEventListener(
                     story_data: story_data,
                 })
             );
+        } else if (event.data.command === "get_feed_by_id") {
+            get_feed_by_id(event.data.feed_id).then(feed_data =>
+                event.source.postMessage({
+                    command: "feed",
+                    feed_data: feed_data,
+                })
+            );
         } else if (event.data.command === "set_story") {
             set_story(event.data.story_data);
         } else if (event.data.command === "add_local_feed") {
@@ -219,6 +238,14 @@ window.addEventListener(
                 feeds[feed_data.attributes.id] = feed_data;
                 browser.storage.local.set({local_feeds: feeds});
             });
+        } else if (event.data.command === "get_new_feed_id") {
+            get_new_feed_id().then(new_feed_id =>
+                event.source.postMessage({
+                    command: "new_feed_id",
+                    new_feed_id: new_feed_id,
+                })
+            );
+
         }
     }
 );
@@ -229,6 +256,7 @@ async function setup_storage() {
     browser.storage.local.set({
         local_feeds: result.local_feeds || {},
         local_stories: result.local_stories || {},
+        next_feed_id: result.next_feed_id || -1,
     });
 }
 setup_storage();

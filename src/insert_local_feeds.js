@@ -15,13 +15,18 @@ async function load_local_feeds() {
     }
 }
 
-async function load_local_feed(feed_id) {
+async function load_local_feed(feed_id, page, first_load, callback, error_callback) {
+    const feed = await messages.get_feed_by_id(feed_id);
     const stories = await messages.get_stories(feed_id);
-    NEWSBLUR.assets.stories.reset(stories, { added: stories.length });
-}
 
-function create_feed_id(rss_url) {
-    return "local_feed_" + hash(rss_url);
+    const data = {};
+    Object.assign(data, feed.attributes);
+    delete data.id;
+    data.feed_id = feed_id;
+    data.stories = stories.map(story => story.attributes);
+
+    NEWSBLUR.assets.feed_id = feed_id;
+    NEWSBLUR.assets.load_feed_precallback(data, feed_id, callback, first_load);
 }
 
 async function add_local_feed(rss_url, folder_name) {
@@ -29,7 +34,7 @@ async function add_local_feed(rss_url, folder_name) {
 
     /* new feed data */
     const feed_attributes = {
-        "id": create_feed_id(rss_url),
+        "id": await messages.get_new_feed_id(),
         "feed_title": rss_data.title,
         "feed_address": rss_url,
         "feed_link": rss_data.link,
@@ -122,8 +127,8 @@ function main() {
 
     const load_feed = NEWSBLUR.AssetModel.prototype.load_feed;
     NEWSBLUR.AssetModel.prototype.load_feed = function (feed_id, page, first_load, callback, error_callback) {
-        if (is_string(feed_id) && feed_id.startsWith("local_feed_")) {
-            load_local_feed(feed_id);
+        if (feed_id < 0) {
+            load_local_feed(feed_id, page, first_load, callback, error_callback);
         } else {
             load_feed.call(
                 NEWSBLUR.assets, feed_id, page, first_load, callback, error_callback

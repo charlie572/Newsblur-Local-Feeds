@@ -29,17 +29,17 @@ window.addEventListener(
             message_resolvers.get("local_feeds")(feeds);
             message_resolvers.delete("local_feeds");
         } else if (event.data.command === "stories") {
-            const story_data = event.data.story_data;
-            const stories = story_data.map(data =>
-                new NEWSBLUR.Models.Story(data.attributes)
-            );
-            message_resolvers.get("stories")(stories);
+            message_resolvers.get("stories")(event.data.story_data);
             message_resolvers.delete("stories");
         } else if (event.data.command === "story") {
-            const story_data = event.data.story_data;
-            const story = new NEWSBLUR.Models.Story(story_data.attributes)
-            message_resolvers.get("story")(story);
+            message_resolvers.get("story")(event.data.story_data);
             message_resolvers.delete("story");
+        } else if (event.data.command === "feed") {
+            message_resolvers.get("feed")(event.data.feed_data);
+            message_resolvers.delete("feed");
+        } else if (event.data.command === "new_feed_id") {
+            message_resolvers.get("new_feed_id")(event.data.new_feed_id);
+            message_resolvers.delete("new_feed_id");
         }
     }
 );
@@ -112,6 +112,33 @@ export async function get_story_by_hash(hash) {
 
     let { promise, resolve, reject } = Promise.withResolvers();
     message_resolvers.set("story", resolve);
+    return promise;
+}
+
+export async function get_feed_by_id(feed_id) {
+    window.postMessage(
+        {
+            command: "get_feed_by_id",
+            feed_id: feed_id,
+        },
+        "*",
+    );
+
+    let { promise, resolve, reject } = Promise.withResolvers();
+    message_resolvers.set("feed", resolve);
+    return promise;
+}
+
+export async function get_new_feed_id() {
+    window.postMessage(
+        {
+            command: "get_new_feed_id",
+        },
+        "*",
+    );
+
+    let { promise, resolve, reject } = Promise.withResolvers();
+    message_resolvers.set("new_feed_id", resolve);
     return promise;
 }
 
