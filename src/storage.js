@@ -1,8 +1,8 @@
-function create_story_hash(story_rss_data) {
+export function create_story_hash(story_rss_data) {
     return "local_story_" + hash(story_rss_data);
 }
 
-function create_story_data(story_rss_data) {
+export function create_story_data(story_rss_data) {
     const story_hash = create_story_hash(story_rss_data);
     const attributes = {
         "story_hash": story_hash,
@@ -37,7 +37,7 @@ function create_story_data(story_rss_data) {
     return {attributes};
 }
 
-async function get_stories(feed_id) {
+export async function get_stories(feed_id) {
     const feed_data = await get_feed_from_storage(feed_id);
 
     /* fetch rss feed */
@@ -66,7 +66,7 @@ async function get_stories(feed_id) {
     return story_data;
 }
 
-async function get_story_by_hash(story_hash) {
+export async function get_story_by_hash(story_hash) {
     /* get all story data in browser */
     const result = await browser.storage.local.get("local_stories");
     const story_data = result.local_stories;
@@ -82,7 +82,7 @@ async function get_story_by_hash(story_hash) {
     throw new Error("Couldn't find story hash.");
 }
 
-async function set_story(data) {
+export async function set_story(data) {
     /* get all story data in browser */
     const result = await browser.storage.local.get("local_stories");
     const story_data = result.local_stories;
@@ -101,26 +101,26 @@ async function set_story(data) {
     throw new Error("Couldn't find story hash.");
 }
 
-async function get_feed_from_storage(feed_id) {
+export async function get_feed_from_storage(feed_id) {
     const result = await browser.storage.local.get("local_feeds");
     const feeds = result.local_feeds;
     return feeds[feed_id];
 }
 
-async function get_new_feed_id() {
+export async function get_new_feed_id() {
     const result = await browser.storage.local.get("next_feed_id");
     const new_feed_id = result.next_feed_id;
     await browser.storage.local.set({next_feed_id: new_feed_id - 1});
     return new_feed_id;
 }
 
-async function set_feed_folders(feed_id, folders) {
+export async function set_feed_folders(feed_id, folders) {
     const result = await browser.storage.local.get("local_feeds");
     result.local_feeds[feed_id].folders = folders;
     await browser.storage.local.set(result);
 }
 
-async function delete_feed_in_folder(feed_id, folder) {
+export async function delete_feed_in_folder(feed_id, folder) {
     const result = await browser.storage.local.get("local_feeds");
     const folders = result.local_feeds[feed_id].folders;
     
@@ -139,7 +139,7 @@ async function delete_feed_in_folder(feed_id, folder) {
     await browser.storage.local.set(result);
 }
 
-async function get_feeds_trainer(feed_id) {
+export async function get_feeds_trainer(feed_id) {
     const result = await browser.storage.local.get(
         ["local_feeds_trainers", "local_stories"]
     );
@@ -176,7 +176,7 @@ async function get_feeds_trainer(feed_id) {
     return trainer;
 }
 
-async function save_classifier(classifier_update) {
+export async function save_classifier(classifier_update) {
     const result = await browser.storage.local.get("local_feeds_trainers");
 
     const feed_id = classifier_update.feed_id;
@@ -227,7 +227,7 @@ async function save_classifier(classifier_update) {
     await browser.storage.local.set(result);
 }
 
-async function setup_storage() {
+export async function setup_storage() {
     const result = await browser.storage.local.get([
         "local_feeds", 
         "local_stories", 
@@ -242,4 +242,3 @@ async function setup_storage() {
         next_feed_id: result.next_feed_id || -1,
     });
 }
-setup_storage();
