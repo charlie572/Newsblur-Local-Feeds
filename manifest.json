@@ -6,7 +6,7 @@
     "content_scripts": [
 		{
 			"matches": ["https://www.newsblur.com/*"],
-			"js": ["dist/inject.js"]
+			"js": ["dist/local_feeds_dom_only.js"]
 		}
 	],
 
