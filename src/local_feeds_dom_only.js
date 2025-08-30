@@ -90,7 +90,28 @@ function get_folder_element(folder_name) {
     throw new Error("Couldn't find folder")
 }
 
+function add_local_feed(url, folder) {
+}
+
 async function main() {
     await load_local_feeds();
+
+    const add_button = document.querySelector(".NB-task-add");
+    add_button.onclick = () => setTimeout(() => {
+        const popup = document.querySelector(".NB-add-popover");
+
+        const button = document.createElement("div");
+        button.className = "NB-modal-submit-button NB-modal-submit-green";
+        button.innerText = "Add local site";
+        button.style.float = "right";
+        button.style.margin = "6px 0 6px 0";
+
+        const url = popup.querySelector(".NB-add-url");
+        const folder = popup.querySelector(".NB-folders");
+        button.onclick = () => add_local_feed(url.value, folder.value);
+
+        const add_site_group = popup.querySelector(".NB-add-site");
+        add_site_group.appendChild(button);
+    }, 500);
 }
 setTimeout(main, 2000);
