@@ -256,3 +256,9 @@ export async function setup_storage() {
         next_feed_id: result.next_feed_id || -1,
     });
 }
+
+export async function get_num_unread(feed_id) {
+    const stories = await get_stories(feed_id);
+    console.log(stories);
+    return stories.filter(story => story.attributes.read_status === 0).length;
+}
