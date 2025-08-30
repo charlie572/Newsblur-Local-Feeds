@@ -227,6 +227,11 @@ export async function save_classifier(classifier_update) {
     await browser.storage.local.set(result);
 }
 
+export async function get_local_feeds() {
+    const result = await browser.storage.local.get("local_feeds");
+    return result.local_feeds;
+}
+
 export async function setup_storage() {
     const result = await browser.storage.local.get([
         "local_feeds", 
