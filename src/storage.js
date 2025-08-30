@@ -232,6 +232,12 @@ export async function get_local_feeds() {
     return result.local_feeds;
 }
 
+export async function add_local_feed_to_storage(feed_data) {
+    const result = await browser.storage.local.get("local_feeds");
+    result.local_feeds[feed_data.id] = feed_data;
+    await browser.storage.local.set(result);
+}
+
 export async function setup_storage() {
     const result = await browser.storage.local.get([
         "local_feeds", 

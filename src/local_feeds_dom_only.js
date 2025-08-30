@@ -1,3 +1,6 @@
+import { parse_rss } from "./rss.js";
+import * as storage from "./storage.js";
+
 // import { NEWSBLUR } from "./setup_env.js";
 // import "../repos/NewsBlur/media/js/newsblur/models/feeds.js";
 
@@ -21,14 +24,7 @@
 // import_newsblur_scripts();
 
 async function load_local_feeds() {
-    // const feed_data = await storage.get_local_feeds();
-
-    const feed_data = {
-        "-1": {
-            attributes: {}, 
-            folders: ["Art"],
-        },
-    };
+    const feed_data = await storage.get_local_feeds();
 
     for (const id in feed_data) {
         add_feed_to_document(feed_data[id]);
@@ -54,7 +50,7 @@ function create_feed_title_view(feed_data) {
     const view = document.createElement("li");
     view.className = "feed unread_positive NB-toplevel";
     view.innerHTML = (
-        '<div class="feed_counts">\
+        `<div class="feed_counts">\
             <div class="feed_counts_floater">\
                 <div class=" unread_positive">\
                     <span class="unread_count unread_count_positive unread_count_full">1</span>\
@@ -63,12 +59,12 @@ function create_feed_title_view(feed_data) {
                 </div>\
             </div>\
         </div>\
-        <img class="feed_favicon" src="https://s3.amazonaws.com/icons.newsblur.com/8971696.png">\
-        <span class="feed_title">3Blue1Brown mailing list</span>\
+        <img class="feed_favicon" src="${feed_data.attributes.favicon_url}">\
+        <span class="feed_title">${feed_data.attributes.feed_title}</span>\
         <div class="NB-feed-exception-icon"></div>\
         <div class="NB-feed-unfetched-icon"></div>\
         <div class="NB-feedlist-manage-icon" role="button"></div>\
-        <div class="NB-feed-highlight"></div>'
+        <div class="NB-feed-highlight"></div>`
     );
 
     return view;
@@ -90,10 +86,61 @@ function get_folder_element(folder_name) {
     throw new Error("Couldn't find folder")
 }
 
-function add_local_feed(url, folder) {
+async function add_local_feed(rss_url, folder_name) {
+    const rss_data = await parse_rss(rss_url);
+
+    /* new feed data */
+    const feed_attributes = {
+        "id": await storage.get_new_feed_id(),
+        "feed_title": rss_data.title,
+        "feed_address": rss_url,
+        "feed_link": rss_data.link,
+        "num_subscribers": 28,
+        "updated": "52 minutes",
+        "updated_seconds_ago": 3179,
+        "fs_size_bytes": 4130982,
+        "archive_count": 332,
+        "last_story_date": "2025-08-21 11:00:00",
+        "last_story_seconds_ago": 121182,
+        "stories_last_month": 11,
+        "average_stories_per_month": 6,
+        "min_to_decay": 240,
+        "subs": 28,
+        "is_push": true,
+        "is_newsletter": false,
+        "search_indexed": true,
+        "discover_indexed": true,
+        "favicon_color": "ff184a",
+        "favicon_fade": "ff3668",
+        "favicon_border": "bf1237",
+        "favicon_text_color": "white",
+        "favicon_fetching": false,
+        "favicon_url": rss_data.image_url,
+        "s3_page": false,
+        "s3_icon": true,
+        "similar_feeds": [],
+        "ps": 0,
+        "nt": rss_data.items.length,
+        "ng": 0,
+        "active": true,
+        "fetched_once": true,
+        "has_exception": false,
+        "feed_opens": 4,
+        "subscribed": true,
+    };
+
+    folder_name = folder_name.split(":")[1].toLowerCase();
+
+    await storage.add_local_feed_to_storage({
+        attributes: feed_attributes, 
+        folders: [folder_name],
+    });
+
+    await load_local_feeds();
 }
 
 async function main() {
+    await storage.setup_storage();
     await load_local_feeds();
 
     const add_button = document.querySelector(".NB-task-add");
