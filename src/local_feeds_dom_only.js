@@ -67,6 +67,8 @@ function create_feed_title_view(feed_data) {
         <div class="NB-feed-highlight"></div>`
     );
 
+    view.onclick = () => open_feed(feed_data);
+
     return view;
 }
 
@@ -84,6 +86,55 @@ function get_folder_element(folder_name) {
     }
 
     throw new Error("Couldn't find folder")
+}
+
+function create_story_view(story_data) {
+    const attrs = story_data.attributes;
+
+    const date = new Date(attrs.story_timestamp * 1000)
+    const date_string = date.toLocaleString();
+
+    const view = document.createElement("div");
+    view.className = "NB-story-title-container";
+    view.innerHTML = (
+        `<div class="NB-story-title NB-story-title-split NB-has-image NB-story-positive">\
+            <div class="NB-storytitles-feed-border-inner" style="background-color: rgb(159, 120, 84);"></div>\
+            <div class="NB-storytitles-feed-border-outer" style="background-color: rgb(129, 90, 54);"></div>\
+            <a href="${attrs.story_permalink}" class="story_title NB-hidden-fade">\
+                <div class="NB-storytitles-sentiment" role="button"></div>\
+                <div class="NB-story-manage-icon" role="button"></div>\
+                <div class="NB-storytitles-story-image-container"></div>\
+                <div class="NB-storytitles-star"></div>\
+                <div class="NB-storytitles-share"></div>\
+                <span class="NB-storytitles-title">${attrs.story_title}</span>\
+                <div class="NB-storytitles-content-preview"></div>\
+                <div class="NB-story-title-split-bottom">\
+                    <span class="story_date NB-hidden-fade">${date_string}</span>\
+                    <span class="NB-middot">·</span>\
+                    <span class="NB-storytitles-author">${attrs.story_authors}</span>\
+                </div>\
+            </a>\
+        </div>\
+        <div class="NB-story-detail"></div>`
+    );
+    return view;
+}
+
+async function open_feed(feed_data) {
+    // const formatted_title = feed_data.attributes.feed_title.toLowerCase().replace(" ", "-");
+    // const url = `https://www.newsblur.com/site/${feed_data.attributes.id}/${formatted_title}`
+    // window.location.replace(url);
+
+    const stories = await storage.get_stories(feed_data.attributes.id);
+
+    document.body.classList.add("NB-show-reader");
+
+    const story_titles = document.querySelector(".right-pane .NB-story-titles");
+    while (story_titles.firstChild) story_titles.removeChild(story_titles.firstChild);
+    for (const story_data of stories) {
+        const view = create_story_view(story_data);
+        story_titles.appendChild(view);
+    }
 }
 
 async function add_local_feed(rss_url, folder_name) {

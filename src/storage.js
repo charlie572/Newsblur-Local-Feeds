@@ -1,3 +1,6 @@
+import { parse_rss } from "./rss.js";
+import hash from "object-hash";
+
 export function create_story_hash(story_rss_data) {
     return "local_story_" + hash(story_rss_data);
 }
@@ -234,7 +237,7 @@ export async function get_local_feeds() {
 
 export async function add_local_feed_to_storage(feed_data) {
     const result = await browser.storage.local.get("local_feeds");
-    result.local_feeds[feed_data.id] = feed_data;
+    result.local_feeds[feed_data.attributes.id] = feed_data;
     await browser.storage.local.set(result);
 }
 
