@@ -97,7 +97,7 @@ function create_story_view(story_data) {
     const view = document.createElement("div");
     view.className = "NB-story-title-container";
     view.innerHTML = (
-        `<div class="NB-story-title NB-story-title-split NB-has-image NB-story-positive">\
+        `<div class="NB-story-title NB-story-title-split NB-has-image NB-story-positive ${attrs.read_status ? 'read' : ''}">\
             <div class="NB-storytitles-feed-border-inner" style="background-color: rgb(159, 120, 84);"></div>\
             <div class="NB-storytitles-feed-border-outer" style="background-color: rgb(129, 90, 54);"></div>\
             <a href="${attrs.story_permalink}" class="story_title NB-hidden-fade">\
@@ -118,12 +118,12 @@ function create_story_view(story_data) {
         <div class="NB-story-detail"></div>`
     );
 
-    view.onclick = () => open_story(story_data);
+    view.onclick = () => open_story(story_data, view);
 
     return view;
 }
 
-function open_story(story_data) {
+function open_story(story_data, story_list_view) {
     const attrs = story_data.attributes;
 
     const title = document.querySelector(".NB-feed-story .NB-feed-story-header-title");
@@ -146,6 +146,11 @@ function open_story(story_data) {
 
     const content = document.querySelector(".NB-text-view .NB-feed-story .NB-feed-story-content");
     content.innerHTML = attrs.story_content || "";
+
+    // mark story as read
+    story_data.attributes.read_status = 1;
+    storage.set_story(story_data);
+    story_list_view.classList.add("read");
 }
 
 async function open_feed(feed_data) {
