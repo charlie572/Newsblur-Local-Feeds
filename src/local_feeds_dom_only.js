@@ -117,7 +117,35 @@ function create_story_view(story_data) {
         </div>\
         <div class="NB-story-detail"></div>`
     );
+
+    view.onclick = () => open_story(story_data);
+
     return view;
+}
+
+function open_story(story_data) {
+    const attrs = story_data.attributes;
+
+    const title = document.querySelector(".NB-feed-story .NB-feed-story-header-title");
+    title.innerText = "";
+
+    const icon = document.querySelector(".NB-feed-story .NB-feed-story-feed .feed_favicon");
+    icon.src = attrs.favicon_url;
+
+    const story_title = document.querySelector(".NB-text-view .NB-feed-story .NB-feed-story-header .NB-feed-story-title");
+    story_title.href = attrs.story_permalink;
+    story_title.innerText = attrs.story_title;
+
+    const date_view = document.querySelector(".NB-text-view .NB-feed-story .NB-feed-story-date");
+    const date = new Date(attrs.story_timestamp * 1000)
+    const date_string = date.toLocaleString();
+    date.innerText = date_string;
+
+    const author = document.querySelector(".NB-text-view .NB-feed-story .NB-feed-story-author");
+    author.innerText = attrs.story_authors;
+
+    const content = document.querySelector(".NB-text-view .NB-feed-story .NB-feed-story-content");
+    content.innerHTML = attrs.story_content || "";
 }
 
 async function open_feed(feed_data) {
