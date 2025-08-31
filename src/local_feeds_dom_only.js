@@ -197,10 +197,6 @@ async function open_feed_view() {
 }
 
 async function open_feed(feed_data, feed_view) {
-    // const formatted_title = feed_data.attributes.feed_title.toLowerCase().replace(" ", "-");
-    // const url = `https://www.newsblur.com/site/${feed_data.attributes.id}/${formatted_title}`
-    // window.location.replace(url);
-
     await open_feed_view();
 
     const stories = await storage.get_stories(feed_data.attributes.id);
@@ -213,6 +209,8 @@ async function open_feed(feed_data, feed_view) {
         const view = create_story_view(story_data);
         story_titles.appendChild(view);
     }
+
+    open_story(stories[0], story_titles.firstChild);
 }
 
 async function add_local_feed(rss_url, folder_name) {
