@@ -193,7 +193,7 @@ async function open_split_view() {
     document.querySelector(".NB-task-layout-split").click();
 
     // select feed view
-    document.querySelector(".task_view_feed").click();
+    document.querySelector(".task_view_text").click();
 
     // The story view isn't open, open a random one.
     if (!document.querySelector(".NB-feed-story-view .NB-feed-story")) {
