@@ -103,6 +103,8 @@ function create_story_view(story_data) {
 }
 
 function open_story(story_data, story_list_view) {
+    select_story(story_list_view);
+
     const attrs = story_data.attributes;
 
     const title = document.querySelector(".NB-feed-story .NB-feed-story-header-title");
@@ -129,7 +131,7 @@ function open_story(story_data, story_list_view) {
     // mark story as read
     story_data.attributes.read_status = 1;
     storage.set_story(story_data);
-    story_list_view.classList.add("read");
+    story_list_view.querySelector(".NB-story-title").classList.add("read");
 }
 
 function select_feed(feed_view) {
@@ -142,6 +144,18 @@ function select_feed(feed_view) {
 
     feed_view.classList.add("selected");
     feed_view.classList.add("NB-selected");
+}
+
+function select_story(story_view) {
+    const story_list = document.getElementById("story_titles");
+    const stories = Array.from(story_list.querySelectorAll(".NB-story-title-container"));
+    for (const story of stories) {
+        story.classList.remove("NB-selected");
+        story.querySelector(".NB-story-title").classList.remove("NB-selected");
+    }
+
+    story_view.classList.add("NB-selected");
+    story_view.querySelector(".NB-story-title").classList.add("NB-selected");
 }
 
 function is_local_feed(feed_view) {
