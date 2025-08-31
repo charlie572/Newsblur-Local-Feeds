@@ -1,28 +1,6 @@
 import { parse_rss } from "./rss.js";
 import * as storage from "./storage.js";
 
-// import { NEWSBLUR } from "./setup_env.js";
-// import "../repos/NewsBlur/media/js/newsblur/models/feeds.js";
-
-
-// async function import_newsblur_scripts() {
-//     const setup_script = document.head.querySelector("script");
-//     const setup_js = setup_script.innerText;
-
-//     const response = await fetch("https://www.newsblur.com/static/js/common.8b480b7f0cea.js");
-//     if (!response.ok) {
-//         throw new Error("Failed to get newsblur javascript");
-//     }
-//     const common_js = await response.text();
-
-//     eval(setup_js);
-//     eval(common_js);
-
-//     console.log(NEWSBLUR);
-// }
-
-// import_newsblur_scripts();
-
 async function load_local_feeds() {
     const feed_data = await storage.get_local_feeds();
 
@@ -68,7 +46,7 @@ async function create_feed_title_view(feed_data) {
         <div class="NB-feed-highlight"></div>`
     );
 
-    view.onclick = () => open_feed(feed_data);
+    view.onclick = () => open_feed(feed_data, view);
 
     return view;
 }
@@ -154,7 +132,34 @@ function open_story(story_data, story_list_view) {
     story_list_view.classList.add("read");
 }
 
-async function open_feed(feed_data) {
+function select_feed(feed_view) {
+    const feed_list = document.getElementById("feed_list");
+    const feeds = Array.from(feed_list.querySelectorAll(".feed"));
+    for (const feed of feeds) {
+        feed.classList.remove("selected");
+        feed.classList.remove("NB-selected");
+    }
+
+    feed_view.classList.add("selected");
+    feed_view.classList.add("NB-selected");
+}
+
+function is_local_feed(feed_view) {
+    return !("data-id" in feed_view.attributes);
+}
+
+function deselect_local_feed() {
+    const feed_list = document.getElementById("feed_list");
+    const feeds = Array.from(feed_list.querySelectorAll(".feed"));
+    for (const feed of feeds) {
+        if (is_local_feed(feed)) {
+            feed.classList.remove("selected");
+            feed.classList.remove("NB-selected");
+        }
+    }
+}
+
+async function open_feed(feed_data, feed_view) {
     // const formatted_title = feed_data.attributes.feed_title.toLowerCase().replace(" ", "-");
     // const url = `https://www.newsblur.com/site/${feed_data.attributes.id}/${formatted_title}`
     // window.location.replace(url);
@@ -162,6 +167,8 @@ async function open_feed(feed_data) {
     const stories = await storage.get_stories(feed_data.attributes.id);
 
     document.body.classList.add("NB-show-reader");
+
+    select_feed(feed_view);
 
     const story_titles = document.querySelector(".right-pane .NB-story-titles");
     while (story_titles.firstChild) story_titles.removeChild(story_titles.firstChild);
@@ -217,15 +224,24 @@ async function add_local_feed(rss_url, folder_name) {
     folder_name = folder_name.split(":")[1].toLowerCase();
 
     await storage.add_local_feed_to_storage({
-        attributes: feed_attributes, 
+        attributes: feed_attributes,
         folders: [folder_name],
     });
 
     await load_local_feeds();
 }
 
+function bind_feed_clicks(func) {
+    const feed_list = document.getElementById("feed_list");
+    const feeds = Array.from(feed_list.querySelectorAll(".feed"));
+    for (const feed of feeds) {
+        feed.onclick = func;
+    }
+}
+
 async function main() {
     await storage.setup_storage();
+    bind_feed_clicks(() => deselect_local_feed());
     await load_local_feeds();
 
     const add_button = document.querySelector(".NB-task-add");
