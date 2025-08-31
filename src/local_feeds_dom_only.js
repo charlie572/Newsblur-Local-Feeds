@@ -180,7 +180,7 @@ function get_non_local_feeds() {
     return feeds;
 }
 
-async function open_feed_view() {
+async function open_split_view() {
     // If the story list isn't open, click on a random feed to open it.
     var story = document.querySelector("#story_titles .NB-story-title-container");
     if (!story) {
@@ -189,15 +189,21 @@ async function open_feed_view() {
         story = await waitForElm("#story_titles .NB-story-title-container");
     }
 
+    // select split view
+    document.querySelector(".NB-task-layout-split").click();
+
+    // select feed view
+    document.querySelector(".task_view_feed").click();
+
     // The story view isn't open, open a random one.
-    if (!document.querySelector(".NB-text-view .NB-feed-story")) {
+    if (!document.querySelector(".NB-feed-story-view .NB-feed-story")) {
         story.querySelector(".NB-story-title").click();
-        await waitForElm(".NB-text-view .NB-feed-story");
+        await waitForElm(".NB-feed-story-view .NB-feed-story");
     }
 }
 
 async function open_feed(feed_data, feed_view) {
-    await open_feed_view();
+    await open_split_view();
 
     const stories = await storage.get_stories(feed_data.attributes.id);
 
