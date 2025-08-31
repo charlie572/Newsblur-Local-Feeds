@@ -1,5 +1,6 @@
 import { parse_rss } from "./rss.js";
 import * as storage from "./storage.js";
+import { waitForElm } from "./utils.js";
 
 async function load_local_feeds() {
     const feed_data = await storage.get_local_feeds();
@@ -173,14 +174,28 @@ function deselect_local_feed() {
     }
 }
 
+function get_non_local_feeds() {
+    var feeds = Array.from(document.querySelectorAll("#feed_list .feed"));
+    feeds = feeds.filter(feed => "data-id" in feed.attributes);
+    return feeds;
+}
+
+async function open_split_view() {
+    const non_local_feed = get_non_local_feeds()[0];
+    non_local_feed.click();
+    const story = await waitForElm("#story_titles .NB-story-title-container");
+    story.querySelector(".NB-story-title").click();
+    await waitForElm(".NB-text-view .NB-feed-story");
+}
+
 async function open_feed(feed_data, feed_view) {
     // const formatted_title = feed_data.attributes.feed_title.toLowerCase().replace(" ", "-");
     // const url = `https://www.newsblur.com/site/${feed_data.attributes.id}/${formatted_title}`
     // window.location.replace(url);
 
-    const stories = await storage.get_stories(feed_data.attributes.id);
+    await open_split_view();
 
-    document.body.classList.add("NB-show-reader");
+    const stories = await storage.get_stories(feed_data.attributes.id);
 
     select_feed(feed_view);
 
