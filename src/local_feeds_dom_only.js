@@ -302,12 +302,34 @@ function get_selected_feed_view() {
 }
 
 function get_selected_story_view() {
-    return document.querySelector("#story_titles .NB-story-title-container.NB-selected")
+    return document.querySelector("#story_titles .NB-story-title-container.NB-selected");
 }
 
 function is_local_feed_open() {
     const feed = get_selected_feed_view();
     return is_local_feed(feed);
+}
+
+function get_next_story() {
+    const current_story = get_selected_story_view();
+    const stories = Array.from(current_story.parentNode.childNodes)
+    const current_index = stories.indexOf(current_story);
+    if (current_index < stories.length - 1) {
+        return stories[current_index + 1];
+    } else {
+        return null;
+    }
+}
+
+function get_previous_story() {
+    const current_story = get_selected_story_view();
+    const stories = Array.from(current_story.parentNode.childNodes)
+    const current_index = stories.indexOf(current_story);
+    if (current_index > 0) {
+        return stories[current_index - 1];
+    } else {
+        return null;
+    }
 }
 
 async function process_keydown(event) {
@@ -317,9 +339,9 @@ async function process_keydown(event) {
     event.stopPropagation();
 
     if (event.key === "j") {
-        // move to next story
+        select_story(get_next_story());
     } else if (event.key === "k") {
-        // move to previous story
+        select_story(get_previous_story());
     } else if (event.key === "m" || event.key === "u") {
         const story_view = get_selected_story_view()
         const story_data = await storage.get_story_by_hash(story_view.attributes["story-hash"]);
