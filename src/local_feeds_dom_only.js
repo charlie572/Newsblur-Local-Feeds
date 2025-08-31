@@ -180,12 +180,20 @@ function get_non_local_feeds() {
     return feeds;
 }
 
-async function open_split_view() {
-    const non_local_feed = get_non_local_feeds()[0];
-    non_local_feed.click();
-    const story = await waitForElm("#story_titles .NB-story-title-container");
-    story.querySelector(".NB-story-title").click();
-    await waitForElm(".NB-text-view .NB-feed-story");
+async function open_feed_view() {
+    // If the story list isn't open, click on a random feed to open it.
+    var story = document.querySelector("#story_titles .NB-story-title-container");
+    if (!story) {
+        const non_local_feed = get_non_local_feeds()[0];
+        non_local_feed.click();
+        story = await waitForElm("#story_titles .NB-story-title-container");
+    }
+
+    // The story view isn't open, open a random one.
+    if (!document.querySelector(".NB-text-view .NB-feed-story")) {
+        story.querySelector(".NB-story-title").click();
+        await waitForElm(".NB-text-view .NB-feed-story");
+    }
 }
 
 async function open_feed(feed_data, feed_view) {
@@ -193,7 +201,7 @@ async function open_feed(feed_data, feed_view) {
     // const url = `https://www.newsblur.com/site/${feed_data.attributes.id}/${formatted_title}`
     // window.location.replace(url);
 
-    await open_split_view();
+    await open_feed_view();
 
     const stories = await storage.get_stories(feed_data.attributes.id);
 
