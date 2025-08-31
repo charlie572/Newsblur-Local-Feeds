@@ -339,9 +339,15 @@ async function process_keydown(event) {
     event.stopPropagation();
 
     if (event.key === "j") {
-        select_story(get_next_story());
+        const next_story = get_next_story();
+        if (next_story) {
+            select_story(next_story);
+        }
     } else if (event.key === "k") {
-        select_story(get_previous_story());
+        const previous_story = get_previous_story();
+        if (previous_story) {
+            select_story(previous_story);
+        }
     } else if (event.key === "m" || event.key === "u") {
         const story_view = get_selected_story_view()
         const story_data = await storage.get_story_by_hash(story_view.attributes["story-hash"]);
