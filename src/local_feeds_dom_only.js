@@ -286,7 +286,7 @@ function bind_feed_clicks(func) {
 
 async function main() {
     await storage.setup_storage();
-    bind_feed_clicks(() => deselect_local_feed());
+    bind_feed_clicks((feed) => deselect_local_feed());
     await load_local_feeds();
 
     const add_button = document.querySelector(".NB-task-add");
