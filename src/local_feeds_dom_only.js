@@ -79,7 +79,7 @@ function create_story_view(story_data) {
         `<div class="NB-story-title NB-story-title-split NB-has-image NB-story-positive ${attrs.read_status ? 'read' : ''}">\
             <div class="NB-storytitles-feed-border-inner" style="background-color: rgb(159, 120, 84);"></div>\
             <div class="NB-storytitles-feed-border-outer" style="background-color: rgb(129, 90, 54);"></div>\
-            <a href="${attrs.story_permalink}" class="story_title NB-hidden-fade">\
+            <div class="story_title NB-hidden-fade">\
                 <div class="NB-storytitles-sentiment" role="button"></div>\
                 <div class="NB-story-manage-icon" role="button"></div>\
                 <div class="NB-storytitles-story-image-container"></div>\
@@ -92,7 +92,7 @@ function create_story_view(story_data) {
                     <span class="NB-middot">·</span>\
                     <span class="NB-storytitles-author">${attrs.story_authors}</span>\
                 </div>\
-            </a>\
+            </div>\
         </div>\
         <div class="NB-story-detail"></div>`
     );
