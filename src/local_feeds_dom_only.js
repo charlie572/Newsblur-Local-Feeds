@@ -26,14 +26,14 @@ async function add_feed_to_document(feed_data) {
 
 async function create_feed_title_view(feed_data) {
     const view = document.createElement("li");
-    view.className = "feed unread_positive NB-toplevel";
+    view.className = "feed unread_neutral NB-toplevel";
     const num_unread = await storage.get_num_unread(feed_data.attributes.id);
     view.innerHTML = (
         `<div class="feed_counts">\
             <div class="feed_counts_floater">\
                 <div class=" unread_neutral">\
-                    <span class="unread_count unread_count_positive unread_count_full">0</span>\
-                    <span class="unread_count unread_count_neutral unread_count_empty">${num_unread}</span>\
+                    <span class="unread_count unread_count_positive unread_count_empty">0</span>\
+                    <span class="unread_count unread_count_neutral unread_count_full">${num_unread}</span>\
                     <span class="unread_count unread_count_negative unread_count_empty">0</span>\
                 </div>\
             </div>\
