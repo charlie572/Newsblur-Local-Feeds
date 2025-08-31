@@ -28,6 +28,7 @@ async function add_feed_to_document(feed_data) {
 async function create_feed_title_view(feed_data) {
     const view = document.createElement("li");
     view.className = "feed unread_neutral NB-toplevel";
+    view.attributes["data-id"] = feed_data.attributes.id;
     const num_unread = await storage.get_num_unread(feed_data.attributes.id);
     view.innerHTML = (
         `<div class="feed_counts">\
@@ -76,6 +77,7 @@ function create_story_view(story_data) {
 
     const view = document.createElement("div");
     view.className = "NB-story-title-container";
+    view.attributes["story-hash"] = story_data.story_hash;
     view.innerHTML = (
         `<div class="NB-story-title NB-story-title-split NB-has-image NB-story-positive ${attrs.read_status ? 'read' : ''}">\
             <div class="NB-storytitles-feed-border-inner" style="background-color: rgb(159, 120, 84);"></div>\
@@ -128,11 +130,26 @@ function open_story(story_data, story_list_view) {
 
     const content = document.querySelector(".NB-text-view .NB-feed-story .NB-feed-story-content");
     content.innerHTML = attrs.story_content || "";
+}
 
-    // mark story as read
+function mark_story_read(story_data, story_view) {
     story_data.attributes.read_status = 1;
     storage.set_story(story_data);
-    story_list_view.querySelector(".NB-story-title").classList.add("read");
+    story_view.querySelector(".NB-story-title").classList.add("read");
+}
+
+function mark_story_unread(story_data, story_view) {
+    story_data.attributes.read_status = 0;
+    storage.set_story(story_data);
+    story_view.querySelector(".NB-story-title").classList.remove("read");
+}
+
+function toggle_story_read(story_data, story_view) {
+    if (story_data.attributes.read_status) {
+        mark_story_unread(story_data, story_view);
+    } else {
+        mark_story_read(story_data, story_view);
+    }
 }
 
 function select_feed(feed_view) {
@@ -160,7 +177,7 @@ function select_story(story_view) {
 }
 
 function is_local_feed(feed_view) {
-    return !("data-id" in feed_view.attributes);
+    return feed_view.attributes["data-id"] < 0;
 }
 
 function deselect_local_feed() {
@@ -176,7 +193,7 @@ function deselect_local_feed() {
 
 function get_non_local_feeds() {
     var feeds = Array.from(document.querySelectorAll("#feed_list .feed"));
-    feeds = feeds.filter(feed => "data-id" in feed.attributes);
+    feeds = feeds.filter(feed => is_local_feed(feed));
     return feeds;
 }
 
@@ -195,15 +212,11 @@ async function open_split_view() {
     // select feed view
     document.querySelector(".task_view_text").click();
 
-    console.log("story", story);
-
     // The story view isn't open, open a random one.
     if (!document.querySelector(".NB-text-view .NB-feed-story")) {
         story.querySelector(".NB-story-title").click();
         await waitForElm(".NB-text-view .NB-feed-story");
     }
-
-    console.log("Done");
 }
 
 async function open_feed(feed_data, feed_view) {
@@ -284,6 +297,36 @@ function bind_feed_clicks(func) {
     }
 }
 
+function get_selected_feed_view() {
+    return document.querySelector("#feed_list .feed.selected");
+}
+
+function get_selected_story_view() {
+    return document.querySelector("#story_titles .NB-story-title-container.NB-selected")
+}
+
+function is_local_feed_open() {
+    const feed = get_selected_feed_view();
+    return is_local_feed(feed);
+}
+
+async function process_keydown(event) {
+    if (!is_local_feed_open()) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (event.key === "j") {
+        // move to next story
+    } else if (event.key === "k") {
+        // move to previous story
+    } else if (event.key === "m" || event.key === "u") {
+        const story_view = get_selected_story_view()
+        const story_data = await storage.get_story_by_hash(story_view.attributes["story-hash"]);
+        toggle_story_read(story_data, story_view);
+    }
+}
+
 async function main() {
     await storage.setup_storage();
     bind_feed_clicks((feed) => deselect_local_feed());
@@ -306,5 +349,7 @@ async function main() {
         const add_site_group = popup.querySelector(".NB-add-site");
         add_site_group.appendChild(button);
     }, 500);
+
+    document.addEventListener("keydown", process_keydown, {capture: true});
 }
 setTimeout(main, 2000);
