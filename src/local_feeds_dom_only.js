@@ -195,11 +195,15 @@ async function open_split_view() {
     // select feed view
     document.querySelector(".task_view_text").click();
 
+    console.log("story", story);
+
     // The story view isn't open, open a random one.
-    if (!document.querySelector(".NB-feed-story-view .NB-feed-story")) {
+    if (!document.querySelector(".NB-text-view .NB-feed-story")) {
         story.querySelector(".NB-story-title").click();
-        await waitForElm(".NB-feed-story-view .NB-feed-story");
+        await waitForElm(".NB-text-view .NB-feed-story");
     }
+
+    console.log("Done");
 }
 
 async function open_feed(feed_data, feed_view) {
