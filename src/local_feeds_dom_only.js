@@ -310,7 +310,7 @@ function is_local_feed_open() {
     return is_local_feed(feed);
 }
 
-function get_next_story() {
+function get_next_story_view() {
     const current_story = get_selected_story_view();
     const stories = Array.from(current_story.parentNode.childNodes)
     const current_index = stories.indexOf(current_story);
@@ -321,7 +321,7 @@ function get_next_story() {
     }
 }
 
-function get_previous_story() {
+function get_previous_story_view() {
     const current_story = get_selected_story_view();
     const stories = Array.from(current_story.parentNode.childNodes)
     const current_index = stories.indexOf(current_story);
@@ -339,14 +339,16 @@ async function process_keydown(event) {
     event.stopPropagation();
 
     if (event.key === "j") {
-        const next_story = get_next_story();
-        if (next_story) {
-            select_story(next_story);
+        const story_view = get_next_story_view();
+        const story_data = await storage.get_story_by_hash(story_view.getAttribute("story-hash"));
+        if (story_view) {
+            open_story(story_data, story_view)
         }
     } else if (event.key === "k") {
-        const previous_story = get_previous_story();
-        if (previous_story) {
-            select_story(previous_story);
+        const story_view = get_previous_story_view();
+        const story_data = await storage.get_story_by_hash(story_view.getAttribute("story-hash"));
+        if (story_view) {
+            open_story(story_data, story_view)
         }
     } else if (event.key === "m" || event.key === "u") {
         const story_view = get_selected_story_view()
