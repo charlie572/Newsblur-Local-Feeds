@@ -84,12 +84,24 @@ function get_folder_hierarchy(root) {
 function create_folder_selector_option(folder_name, depth) {
     const option = document.createElement("div");
     option.style["padding-left"] = `${depth * 12}px`;
-    option.className = "NB-folder-option";
     option.innerHTML = (
         `<div class="NB-icon-add"></div>\
         <div class="NB-icon"></div>\
         <div class="NB-folder-option-title">${folder_name}</div>`
     );
+
+    option.onclick = (event) => {
+        // toggle selected
+        const title = option.querySelector(".NB-folder-option-title");
+        if (option.classList.contains("NB-folder-option-active")) {
+            option.classList.remove("NB-folder-option-active");
+            title.style["font-weight"] = "normal";
+        } else {
+            option.classList.add("NB-folder-option-active");
+            title.style["font-weight"] = "bold";
+        }
+    }
+
     return option
 }
 
