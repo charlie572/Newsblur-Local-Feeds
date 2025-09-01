@@ -286,7 +286,7 @@ function deselect_local_feed() {
 
 function get_non_local_feeds() {
     var feeds = Array.from(document.querySelectorAll("#feed_list .feed"));
-    feeds = feeds.filter(feed => is_local_feed(feed));
+    feeds = feeds.filter(feed => !is_local_feed(feed));
     return feeds;
 }
 
@@ -295,6 +295,7 @@ async function open_split_view() {
     var story = document.querySelector("#story_titles .NB-story-title-container");
     if (!story) {
         const non_local_feed = get_non_local_feeds()[0];
+        console.log("Non local feed", non_local_feed);
         non_local_feed.click();
         story = await waitForElm("#story_titles .NB-story-title-container");
     }
