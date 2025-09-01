@@ -50,6 +50,12 @@ async function create_feed_title_view(feed_data) {
 
     view.onclick = () => open_feed(feed_data, view);
 
+    view.oncontextmenu = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        open_feed_context_menu(view);
+    };
+
     return view;
 }
 
@@ -103,6 +109,80 @@ function create_story_view(story_data) {
     view.onclick = () => open_story(story_data, view);
 
     return view;
+}
+
+function open_feed_context_menu(feed_view) {
+    const menu = document.querySelector(".NB-menu-manage-container");
+    menu.className = "NB-menu-manage-container NB-inverse";
+    menu.style.display = "block";
+    menu.style.opacity = "1";
+    menu.innerHTML = (
+        '<ul class="NB-menu-manage NB-menu-manage-feed">\
+            <li role="button" class="NB-menu-item NB-menu-manage-delete-confirm NB-menu-manage-feed-delete-confirm">\
+                <div class="NB-menu-manage-image"></div>\
+                <div class="NB-menu-manage-title">Really delete?</div>\
+            </li>\
+            <li role="button" class="NB-menu-item NB-menu-manage-delete NB-menu-manage-feed-delete">\
+                <div class="NB-menu-manage-image"></div>\
+                <div class="NB-menu-manage-title">Delete this site</div>\
+            </li>\
+            <li role="button" class="NB-menu-subitem NB-menu-manage-confirm NB-menu-manage-feed-rename-confirm NB-modal-submit">\
+                <div class="NB-menu-manage-confirm-position">\
+                <div class="NB-menu-manage-rename-save NB-menu-manage-feed-rename-save NB-modal-submit-green NB-modal-submit-button">Save</div>\
+                <div class="NB-menu-manage-image"></div>\
+                <input name="new_title" class="NB-menu-manage-title NB-input"></div>\
+            </li>\
+            <li role="button" class="NB-menu-item NB-menu-manage-rename NB-menu-manage-feed-rename">\
+                <div class="NB-menu-manage-image"></div>\
+                <div class="NB-menu-manage-title">Rename this site</div>\
+            </li>\
+            <li role="button" class="NB-menu-item NB-menu-manage-mute NB-menu-manage-feed-mute">\
+                <div class="NB-menu-manage-image"></div>\
+                <div class="NB-menu-manage-title">Mute this site</div>\
+            </li>\
+            <li role="button" class="NB-menu-subitem NB-menu-manage-confirm NB-menu-manage-feed-move-confirm NB-modal-submit">\
+                <div class="NB-menu-manage-confirm-position">\
+                    <div class="NB-change-folders"></div>\
+                </div>\
+            </li>\
+            <li role="button" class="NB-menu-item NB-menu-manage-move NB-menu-manage-feed-move">\
+                <div class="NB-menu-manage-move-save NB-menu-manage-feed-move-save NB-modal-submit-green NB-modal-submit-button">Save</div>\
+                <div class="NB-menu-manage-image"></div>\
+                <div class="NB-menu-manage-title">Change folders</div>\
+            </li>\
+            <li class="NB-menu-separator"></li>\
+            <li role="button" class="NB-menu-item NB-menu-manage-feed-train">\
+                <div class="NB-menu-manage-image"></div>\
+                <div class="NB-menu-manage-title">Intelligence trainer</div>\
+                <div class="NB-menu-manage-subtitle">What you like and dislike.</div>\
+            </li>\
+            <li role="button" class="NB-menu-item NB-menu-manage-feed-notifications">\
+                <div class="NB-menu-manage-image"></div>\
+                <div class="NB-menu-manage-title">Notifications</div>\
+            </li>\
+            <li role="button" class="NB-menu-item NB-menu-manage-feed-settings">\
+                <div class="NB-menu-manage-image"></div>\
+                <div class="NB-menu-manage-title">Site settings</div>\
+            </li>\
+            <li role="button" class="NB-menu-item NB-menu-manage-feed-stats">\
+                <div class="NB-menu-manage-image"></div>\
+                <div class="NB-menu-manage-title">Statistics</div>\
+            </li>\
+            <li class="NB-menu-separator"></li>\
+            <li role="button" class="NB-menu-item NB-menu-manage-feed-reload">\
+                <div class="NB-menu-manage-image"></div>\
+                <div class="NB-menu-manage-title">Insta-fetch stories</div>\
+            </li>\
+            <li role="button" class="NB-menu-item NB-menu-manage-mark-read NB-menu-manage-feed-mark-read NB-disabled">\
+                <div class="NB-menu-manage-image"></div>\
+                <div class="NB-menu-manage-title">Mark as read</div>\
+            </li>\
+            <li class="NB-menu-separator-inverse"></li>\
+        </ul>\
+        <div class="NB-menu-manage-arrow" style="border-radius: 0px 0px 5px 5px;">\
+            <div class="NB-icon"></div>\
+        </div>'
+    );
 }
 
 function open_story(story_data, story_list_view) {
