@@ -58,6 +58,29 @@ export async function open_feed_context_menu(feed_view) {
     };
 }
 
+function get_folder_hierarchy(root) {
+    if (!root) {
+        root = document.getElementById("feed_list").querySelector(".NB-root");
+    }
+
+    const result = [];
+
+    for (const element of root.children) {
+        if (element.classList.contains("NB-empty")) continue;
+
+        if (element.classList.contains("feed")) {
+            result.push(element.getAttribute("data-id"));
+        } else {
+            const folder = element.querySelector(".folder");
+            const children = get_folder_hierarchy(folder);
+            const title = element.querySelector(".folder_title").innerText;
+            result.push({folder_title: title, children: children});
+        }
+    }
+
+    return result;
+}
+
 function open_folder_selector(menu) {
     const selector_item = document.querySelector(".NB-menu-subitem.NB-menu-manage-confirm");
     selector_item.style.height = "84px";
