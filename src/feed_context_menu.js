@@ -81,122 +81,45 @@ function get_folder_hierarchy(root) {
     return result;
 }
 
+function create_folder_selector_option(folder_name, depth) {
+    const option = document.createElement("div");
+    option.style["padding-left"] = `${depth * 12}px`;
+    option.className = "NB-folder-option";
+    option.innerHTML = (
+        `<div class="NB-icon-add"></div>\
+        <div class="NB-icon"></div>\
+        <div class="NB-folder-option-title">${folder_name}</div>`
+    );
+    return option
+}
+
+function create_folder_selector_hierarchy(folder_hierarchy, parent, depth) {
+    depth = depth || 0;
+
+    if (depth == 0) {
+        parent.appendChild(
+            create_folder_selector_option("Top Level", 0)
+        );
+        depth += 1;
+    }
+
+    for (const item of folder_hierarchy) {
+        if (typeof item === "string") continue;
+
+        parent.appendChild(
+            create_folder_selector_option(item.folder_title, depth)
+        );
+
+        create_folder_selector_hierarchy(item.children, parent, depth + 1);
+    }
+}
+
 function open_folder_selector(menu) {
     const selector_item = document.querySelector(".NB-menu-subitem.NB-menu-manage-confirm");
     selector_item.style.height = "84px";
     selector_item.style.display = "block";
 
-    const folders = selector_item.querySelector(".NB-change-folders");
-    folders.innerHTML = (
-        '<div style="padding-left: 0px;" class="NB-folder-option NB-folder-option-active">\
-            <div class="NB-icon-add"></div>\
-            <div class="NB-icon"></div>\
-            <div class="NB-folder-option-title">Top Level</div>\
-        </div>\
-        <div style="padding-left: 12px;" class="NB-folder-option ">\
-            <div class="NB-icon-add"></div>\
-            <div class="NB-icon"></div>\
-            <div class="NB-folder-option-title">Art</div>\
-        </div>\
-        <div style="padding-left: 12px;" class="NB-folder-option ">\
-            <div class="NB-icon-add"></div>\
-            <div class="NB-icon"></div>\
-            <div class="NB-folder-option-title">Entertainment</div>\
-        </div>\
-        <div style="padding-left: 12px;" class="NB-folder-option ">\
-            <div class="NB-icon-add"></div>\
-            <div class="NB-icon"></div>\
-            <div class="NB-folder-option-title">News</div>\
-        </div>\
-        <div style="padding-left: 12px;" class="NB-folder-option ">\
-            <div class="NB-icon-add"></div>\
-            <div class="NB-icon"></div>\
-            <div class="NB-folder-option-title">Science</div>\
-        </div>\
-        <div style="padding-left: 12px;" class="NB-folder-option ">\
-            <div class="NB-icon-add"></div>\
-            <div class="NB-icon"></div>\
-            <div class="NB-folder-option-title">Technology</div>\
-        </div>\
-        <div style="padding-left: 12px;" class="NB-folder-option ">\
-            <div class="NB-icon-add"></div>\
-            <div class="NB-icon"></div>\
-            <div class="NB-folder-option-title">To-read/watch</div>\
-        </div>\
-        <div style="padding-left: 12px;" class="NB-folder-option ">\
-            <div class="NB-icon-add"></div>\
-            <div class="NB-icon"></div>\
-            <div class="NB-folder-option-title">Uncategorized</div>\
-        </div>\
-        <div style="padding-left: 12px;" class="NB-folder-option ">\
-            <div class="NB-icon-add"></div>\
-            <div class="NB-icon"></div>\
-            <div class="NB-folder-option-title">Videos</div>\
-        </div>\
-        <div style="padding-left: 24px;" class="NB-folder-option ">\
-            <div class="NB-icon-add"></div>\
-            <div class="NB-icon"></div>\
-            <div class="NB-folder-option-title">Animation</div>\
-        </div>\
-        <div style="padding-left: 24px;" class="NB-folder-option ">\
-            <div class="NB-icon-add"></div>\
-            <div class="NB-icon"></div>\
-            <div class="NB-folder-option-title">Art Videos</div>\
-        </div>\
-        <div style="padding-left: 24px;" class="NB-folder-option ">\
-            <div class="NB-icon-add"></div>\
-            <div class="NB-icon"></div>\
-            <div class="NB-folder-option-title">Comedy</div>\
-        </div>\
-        <div style="padding-left: 24px;" class="NB-folder-option ">\
-            <div class="NB-icon-add"></div>\
-            <div class="NB-icon"></div>\
-            <div class="NB-folder-option-title">Computers</div>\
-        </div>\
-        <div style="padding-left: 24px;" class="NB-folder-option ">\
-            <div class="NB-icon-add"></div>\
-            <div class="NB-icon"></div>\
-            <div class="NB-folder-option-title">Gaming</div>\
-        </div>\
-        <div style="padding-left: 24px;" class="NB-folder-option ">\
-            <div class="NB-icon-add"></div>\
-            <div class="NB-icon"></div>\
-            <div class="NB-folder-option-title">Maker</div>\
-        </div>\
-        <div style="padding-left: 24px;" class="NB-folder-option ">\
-            <div class="NB-icon-add"></div>\
-            <div class="NB-icon"></div>\
-            <div class="NB-folder-option-title">Maths</div>\
-        </div>\
-        <div style="padding-left: 24px;" class="NB-folder-option ">\
-            <div class="NB-icon-add"></div>\
-            <div class="NB-icon"></div>\
-            <div class="NB-folder-option-title">Music</div>\
-        </div>\
-        <div style="padding-left: 24px;" class="NB-folder-option ">\
-            <div class="NB-icon-add"></div>\
-            <div class="NB-icon"></div>\
-            <div class="NB-folder-option-title">Other Eductional</div>\
-        </div>\
-        <div style="padding-left: 24px;" class="NB-folder-option ">\
-            <div class="NB-icon-add"></div>\
-            <div class="NB-icon"></div>\
-            <div class="NB-folder-option-title">Science Videos</div>\
-        </div>\
-        <div style="padding-left: 24px;" class="NB-folder-option ">\
-            <div class="NB-icon-add"></div>\
-            <div class="NB-icon"></div>\
-            <div class="NB-folder-option-title">Spanish</div>\
-        </div>\
-        <div style="padding-left: 24px;" class="NB-folder-option ">\
-            <div class="NB-icon-add"></div>\
-            <div class="NB-icon"></div>\
-            <div class="NB-folder-option-title">Storytelling Video Essays</div>\
-        </div>\
-        <div style="padding-left: 24px;" class="NB-folder-option ">\
-            <div class="NB-icon-add"></div>\
-            <div class="NB-icon"></div>\
-            <div class="NB-folder-option-title">Vlogs</div>\
-        </div>'
-    );
+    const folder_container = selector_item.querySelector(".NB-change-folders");
+    const hierarchy = get_folder_hierarchy()
+    create_folder_selector_hierarchy(hierarchy, folder_container);
 }
