@@ -183,6 +183,15 @@ function open_feed_context_menu(feed_view) {
             <div class="NB-icon"></div>\
         </div>'
     );
+
+    // close when clicked outside the context menu
+    const click_event = (event) => {
+        if (!menu.contains(event.target)) {
+            menu.style.display = "none";
+            document.removeEventListener("click", click_event);
+        }
+    }
+    document.addEventListener("click", click_event);
 }
 
 function open_story(story_data, story_list_view) {
