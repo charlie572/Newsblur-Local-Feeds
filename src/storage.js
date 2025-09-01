@@ -76,7 +76,7 @@ export async function get_story_by_hash(story_hash) {
 
     for (var feed_id in story_data) {
         for (var data of story_data[feed_id]) {
-            if (data.story_hash === story_hash) {
+            if (data.attributes.story_hash === story_hash) {
                 return data;
             }
         }
