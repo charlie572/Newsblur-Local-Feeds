@@ -111,7 +111,9 @@ function create_story_view(story_data) {
     return view;
 }
 
-function open_feed_context_menu(feed_view) {
+async function open_feed_context_menu(feed_view) {
+    const feed_data = await storage.get_feed_from_storage(feed_view.getAttribute("data-id"));
+
     const feed_rect = feed_view.getBoundingClientRect();
 
     const menu = document.querySelector(".NB-menu-manage-container");
@@ -122,10 +124,6 @@ function open_feed_context_menu(feed_view) {
     menu.style.inset = `${feed_rect.top}px auto auto ${feed_rect.left}px`;
     menu.innerHTML = (
         '<ul class="NB-menu-manage NB-menu-manage-feed">\
-            <li role="button" class="NB-menu-item NB-menu-manage-delete-confirm">\
-                <div class="NB-menu-manage-image"></div>\
-                <div class="NB-menu-manage-title">Really delete?</div>\
-            </li>\
             <li role="button" class="NB-menu-item NB-menu-manage-delete">\
                 <div class="NB-menu-manage-image"></div>\
                 <div class="NB-menu-manage-title">Delete this site</div>\
@@ -155,6 +153,30 @@ function open_feed_context_menu(feed_view) {
         }
     }
     document.addEventListener("click", click_event);
+
+    // delete
+    const delete_button = menu.querySelector(".NB-menu-manage-delete");
+    delete_button.onclick = (event) => {
+        delete_feed(feed_data, feed_view);
+        menu.style.display = "none";
+        document.removeEventListener("click", click_event);
+    }
+}
+
+function get_feed_view_folder_name(feed_view) {
+    var folder = feed_view.parentNode;
+    if (folder.classList.contains("NB-root")) {
+        return "";
+    }
+
+    folder = feed_view.parentNode.parentNode;
+    return folder.querySelector(".folder_title").innerText.toLowerCase();
+}
+
+async function delete_feed(feed_data, feed_view) {
+    const folder_name = get_feed_view_folder_name(feed_view);
+    await storage.delete_feed_in_folder(feed_data.attributes.id, folder_name);
+    feed_view.remove();
 }
 
 function open_story(story_data, story_list_view) {
@@ -254,7 +276,6 @@ async function open_split_view() {
     var story = document.querySelector("#story_titles .NB-story-title-container");
     if (!story) {
         const non_local_feed = get_non_local_feeds()[0];
-        console.log("Non local feed", non_local_feed);
         non_local_feed.click();
         story = await waitForElm("#story_titles .NB-story-title-container");
     }
