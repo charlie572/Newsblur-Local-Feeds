@@ -112,10 +112,14 @@ function create_story_view(story_data) {
 }
 
 function open_feed_context_menu(feed_view) {
+    const feed_rect = feed_view.getBoundingClientRect();
+
     const menu = document.querySelector(".NB-menu-manage-container");
     menu.className = "NB-menu-manage-container NB-inverse";
     menu.style.display = "block";
     menu.style.opacity = "1";
+    menu.style.position = "absolute";
+    menu.style.inset = `${feed_rect.top}px auto auto ${feed_rect.left}px`;
     menu.innerHTML = (
         '<ul class="NB-menu-manage NB-menu-manage-feed">\
             <li role="button" class="NB-menu-item NB-menu-manage-delete-confirm NB-menu-manage-feed-delete-confirm">\
