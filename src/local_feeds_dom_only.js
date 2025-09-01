@@ -28,7 +28,7 @@ async function add_feed_to_document(feed_data) {
 async function create_feed_title_view(feed_data) {
     const view = document.createElement("li");
     view.className = "feed unread_neutral NB-toplevel";
-    view.attributes["data-id"] = feed_data.attributes.id;
+    view.setAttribute("data-id", feed_data.attributes.id);
     const num_unread = await storage.get_num_unread(feed_data.attributes.id);
     view.innerHTML = (
         `<div class="feed_counts">\
@@ -77,7 +77,7 @@ function create_story_view(story_data) {
 
     const view = document.createElement("div");
     view.className = "NB-story-title-container";
-    view.attributes["story-hash"] = story_data.story_hash;
+    view.setAttribute("story-hash", story_data.attributes.story_hash);
     view.innerHTML = (
         `<div class="NB-story-title NB-story-title-split NB-has-image NB-story-positive ${attrs.read_status ? 'read' : ''}">\
             <div class="NB-storytitles-feed-border-inner" style="background-color: rgb(159, 120, 84);"></div>\
@@ -177,7 +177,7 @@ function select_story(story_view) {
 }
 
 function is_local_feed(feed_view) {
-    return feed_view.attributes["data-id"] < 0;
+    return feed_view.getAttribute("data-id") < 0;
 }
 
 function deselect_local_feed() {
@@ -350,7 +350,7 @@ async function process_keydown(event) {
         }
     } else if (event.key === "m" || event.key === "u") {
         const story_view = get_selected_story_view()
-        const story_data = await storage.get_story_by_hash(story_view.attributes["story-hash"]);
+        const story_data = await storage.get_story_by_hash(story_view.getAttribute("story-hash"));
         toggle_story_read(story_data, story_view);
     }
 }
