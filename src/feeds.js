@@ -185,12 +185,13 @@ export async function add_local_feed(rss_url, folder_name) {
 
     folder_name = folder_name.split(":")[1].toLowerCase();
 
-    await storage.add_local_feed_to_storage({
+    const feed_data = {
         attributes: feed_attributes,
         folders: [folder_name],
-    });
+    };
+    await storage.add_local_feed_to_storage(feed_data);
 
-    await load_local_feeds();
+    add_feed_to_document(feed_data);
 }
 
 export function bind_feed_clicks(func) {
