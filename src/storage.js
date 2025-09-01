@@ -48,60 +48,43 @@ export async function get_stories(feed_id) {
     const rss_data = await parse_rss(rss_url);
 
     /* get all story data in browser */
-    const result = await browser.storage.local.get("local_stories");
-    var story_data = result.local_stories[feed_id] || [];
-
-    /* create lookup table of stories by hash */
-    const story_data_by_hash = {};
-    for (var data of story_data) {
-        story_data_by_hash[data.attributes.story_hash] = data;
-    }
+    const result = await browser.storage.local.get([
+        "local_stories",
+        "feed_story_hashes"
+    ]);
+    const story_hashes = result.feed_story_hashes[feed_id] || [];
+    const local_stories = result.local_stories;
 
     /* create stories that aren't in browser storage yet */
-    story_data = rss_data.items.map(item =>
-        story_data_by_hash[create_story_hash(item)] || create_story_data(item)
-    );
+    const story_data = [];
+    for (const item of rss_data.items) {
+        const story_hash = create_story_hash(item);
+        if (story_hash in local_stories) {
+            story_data.push(local_stories[story_hash]);
+        } else {
+            const data = create_story_data(item);
+            local_stories[story_hash] = data;
+            story_data.push(data);
+        }
+    }
 
     /* save stories to browser storage */
     result.local_stories[feed_id] = story_data;
-    await browser.storage.local.set({local_stories: result.local_stories});
+    await browser.storage.local.set(result);
 
     return story_data;
 }
 
 export async function get_story_by_hash(story_hash) {
-    /* get all story data in browser */
     const result = await browser.storage.local.get("local_stories");
-    const story_data = result.local_stories;
-
-    for (var feed_id in story_data) {
-        for (var data of story_data[feed_id]) {
-            if (data.attributes.story_hash === story_hash) {
-                return data;
-            }
-        }
-    }
-
-    throw new Error("Couldn't find story hash.");
+    return result.local_stories[story_hash];
 }
 
 export async function set_story(data) {
     /* get all story data in browser */
     const result = await browser.storage.local.get("local_stories");
-    const story_data = result.local_stories;
-
-    for (var feed_id in story_data) {
-        const index = story_data[feed_id].findIndex(
-            browser_story_data => browser_story_data.attributes.story_hash === data.attributes.story_hash
-        );
-        if (index >= 0) {
-            story_data[feed_id][index] = data;
-            await browser.storage.local.set({local_stories: story_data});
-            return;
-        }
-    }
-
-    throw new Error("Couldn't find story hash.");
+    result.local_stories[data.attributes.story_hash] = data;
+    await browser.storage.local.set(result);
 }
 
 export async function get_feed_from_storage(feed_id) {
@@ -124,7 +107,10 @@ export async function set_feed_folders(feed_id, folders) {
 }
 
 export async function delete_feed_in_folder(feed_id, folder) {
-    const result = await browser.storage.local.get("local_feeds");
+    const result = await browser.storage.local.get([
+        "local_feeds",
+        "feed_story_hashes",
+    ]);
     const folders = result.local_feeds[feed_id].folders;
     
     // delete folder from array
@@ -137,6 +123,7 @@ export async function delete_feed_in_folder(feed_id, folder) {
 
     if (folders.length == 0) {
         delete result.local_feeds[feed_id];
+        delete result.feed_story_hashes[feed_id];
     }
 
     await browser.storage.local.set(result);
@@ -157,12 +144,14 @@ export async function setup_storage() {
     const result = await browser.storage.local.get([
         "local_feeds", 
         "local_stories", 
+        "feed_story_hashes",
         "next_feed_id",
     ]);
 
     browser.storage.local.set({
         local_feeds: result.local_feeds || {},
         local_stories: result.local_stories || {},
+        feed_story_hashes: result.feed_story_hashes || {},
         next_feed_id: result.next_feed_id || -1,
     });
 }
