@@ -122,21 +122,21 @@ function open_feed_context_menu(feed_view) {
     menu.style.inset = `${feed_rect.top}px auto auto ${feed_rect.left}px`;
     menu.innerHTML = (
         '<ul class="NB-menu-manage NB-menu-manage-feed">\
-            <li role="button" class="NB-menu-item NB-menu-manage-delete-confirm NB-menu-manage-feed-delete-confirm">\
+            <li role="button" class="NB-menu-item NB-menu-manage-delete-confirm">\
                 <div class="NB-menu-manage-image"></div>\
                 <div class="NB-menu-manage-title">Really delete?</div>\
             </li>\
-            <li role="button" class="NB-menu-item NB-menu-manage-delete NB-menu-manage-feed-delete">\
+            <li role="button" class="NB-menu-item NB-menu-manage-delete">\
                 <div class="NB-menu-manage-image"></div>\
                 <div class="NB-menu-manage-title">Delete this site</div>\
             </li>\
-            <li role="button" class="NB-menu-subitem NB-menu-manage-confirm NB-menu-manage-feed-move-confirm NB-modal-submit">\
+            <li role="button" class="NB-menu-subitem NB-menu-manage-confirm NB-modal-submit">\
                 <div class="NB-menu-manage-confirm-position">\
                     <div class="NB-change-folders"></div>\
                 </div>\
             </li>\
-            <li role="button" class="NB-menu-item NB-menu-manage-move NB-menu-manage-feed-move">\
-                <div class="NB-menu-manage-move-save NB-menu-manage-feed-move-save NB-modal-submit-green NB-modal-submit-button">Save</div>\
+            <li role="button" class="NB-menu-item">\
+                <div class="NB-menu-manage-move-save NB-modal-submit-green NB-modal-submit-button">Save</div>\
                 <div class="NB-menu-manage-image"></div>\
                 <div class="NB-menu-manage-title">Change folders</div>\
             </li>\
