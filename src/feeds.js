@@ -5,10 +5,29 @@ import * as storage from "./storage.js";
 import { waitForElm } from "./utils.js";
 import { parse_rss } from "./rss.js";
 
-export async function delete_feed(feed_data, feed_view) {
-    const folder_name = get_feed_view_folder_name(feed_view);
+export async function delete_feed(feed_data, feed_view, folder_name) {
     await storage.delete_feed_in_folder(feed_data.attributes.id, folder_name);
     feed_view.remove();
+}
+
+export function get_feed_view(feed_data, folder_view) {
+    for (const feed of folder_view.children) {
+        if (feed.getAttribute("data-id") == feed_data.attributes.id) {
+            return feed;
+        }
+    }
+
+    throw new Error("Couldn't find feed view");
+}
+
+export async function move_folders(feed_data, new_folder_names) {
+    for (const folder_name of feed_data.folders) {
+        if (new_folder_names.includes(folder_name)) continue;
+
+        const folder_view = folders.get_folder_element(folder_name);
+        const feed_view = get_feed_view(feed_data, folder_view);
+        await delete_feed(feed_data, feed_view, folder_name);
+    }
 }
 
 export async function load_local_feeds() {

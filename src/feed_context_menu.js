@@ -1,4 +1,5 @@
 import * as storage from "./storage.js";
+import * as feeds from "./feeds.js";
 
 export async function open_feed_context_menu(feed_view) {
     const feed_data = await storage.get_feed_from_storage(feed_view.getAttribute("data-id"));
@@ -34,9 +35,6 @@ export async function open_feed_context_menu(feed_view) {
         </div>'
     );
 
-    const move_submit = document.querySelector(".NB-menu-manage-move-save");
-    move_submit.style.display = "none";
-
     // close when clicked outside the context menu
     const click_event = (event) => {
         if (!menu.contains(event.target)) {
@@ -49,15 +47,24 @@ export async function open_feed_context_menu(feed_view) {
     // delete
     const delete_button = menu.querySelector(".NB-menu-manage-delete");
     delete_button.onclick = (event) => {
-        delete_feed(feed_data, feed_view);
+        const folder_name = folders.get_feed_view_folder_name(feed_view);
+        delete_feed(feed_data, feed_view, folder_name);
         menu.style.display = "none";
         document.removeEventListener("click", click_event);
     }
 
-    // move
+    // move folders
     const move_button = menu.querySelector(".NB-menu-manage-move-save").parentNode;
     move_button.onclick = (event) => {
         open_folder_selector(menu, feed_data);
+    };
+
+    // submit move folders
+    const move_submit = document.querySelector(".NB-menu-manage-move-save");
+    move_submit.style.display = "none";
+    move_submit.onclick = (event) => {
+        const new_folder_names = get_selected_folder_names();
+        feeds.move_folders(feed_data, new_folder_names);
     };
 }
 
@@ -154,6 +161,17 @@ function select_folders_in_selector(folder_names) {
             }
         }
     }
+}
+
+function get_selected_folder_names() {
+    const folder_names = [];
+    const container = document.querySelector(".NB-change-folders");
+    const selected_options = Array.from(container.querySelectorAll("NB-folder-option-active"));
+    for (const option of selected_options) {
+        folder_names.push(option.innerText);
+    }
+
+    return folder_names;
 }
 
 function open_folder_selector(menu, feed_data) {
