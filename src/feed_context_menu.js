@@ -54,7 +54,7 @@ export async function open_feed_context_menu(feed_view) {
     // move
     const move_button = menu.querySelector(".NB-menu-manage-move-save").parentNode;
     move_button.onclick = (event) => {
-        open_folder_selector(menu);
+        open_folder_selector(menu, feed_data);
     };
 }
 
@@ -126,7 +126,34 @@ function create_folder_selector_hierarchy(folder_hierarchy, parent, depth) {
     }
 }
 
-function open_folder_selector(menu) {
+function select_folders_in_selector(folder_names) {
+    const container = document.querySelector(".NB-change-folders");
+
+    for (var folder_name of folder_names) {
+        if (folder_name === "") {
+            folder_name = "Top Level";
+        }
+
+        const result = document.evaluate(
+            '//div[*[@class="NB-folder-option-title"]]', 
+            container, 
+            null, 
+            XPathResult.UNORDERED_NODE_ITERATOR_TYPE,
+        );
+        
+        var option;
+        while (option = result.iterateNext()) {
+            if (option.innerText.toLowerCase() === folder_name.toLowerCase()) {
+                const title = option.querySelector(".NB-folder-option-title");
+                option.classList.add("NB-folder-option-active");
+                title.style["font-weight"] = "bold";
+                break;
+            }
+        }
+    }
+}
+
+function open_folder_selector(menu, feed_data) {
     const selector_item = document.querySelector(".NB-menu-subitem.NB-menu-manage-confirm");
     selector_item.style.height = "84px";
     selector_item.style.display = "block";
@@ -134,4 +161,6 @@ function open_folder_selector(menu) {
     const folder_container = selector_item.querySelector(".NB-change-folders");
     const hierarchy = get_folder_hierarchy()
     create_folder_selector_hierarchy(hierarchy, folder_container);
+
+    select_folders_in_selector(feed_data.folders);
 }
