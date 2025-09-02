@@ -177,9 +177,9 @@ export async function import_all_data(data) {
 
     delete data.version;
 
-    await browser.storage.set(data);
+    await browser.storage.local.set(data);
 
-    return "";
+    return "Imported. Please refresh Newsblur if it is open.";
 }
 
 export async function export_all_data() {

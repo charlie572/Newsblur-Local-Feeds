@@ -1,7 +1,13 @@
 import { import_all_data, export_all_data } from "../src/storage";
 
+const file_output = document.getElementById("file-output");
+const clear_output = document.getElementById("clear-output");
+
 // import button
 document.getElementById("import-button").onclick = async event => {
+    clear_output.innerHTML = "";
+    file_output.innerHTML = "";
+
     const file_input = document.getElementById("file_input");
     file_input.addEventListener(
         "change",
@@ -12,21 +18,28 @@ document.getElementById("import-button").onclick = async event => {
             const reader = new FileReader();
             reader.readAsText(file);
 
-            reader.onload = readerEvent => {
+            reader.onload = async readerEvent => {
                 // parse file content
                 const json_data = readerEvent.target.result;
                 const data = JSON.parse(json_data);
-                console.log(data);
+                
+                const message = await import_all_data(data);
+
+                file_output.innerHTML = message;
             }
         },
-        { once: true},
+        { once: true },
     );
 
     // open file dialog
     file_input.click();
 };
 
+// export button
 document.getElementById("export-button").onclick = async event => {
+    clear_output.innerHTML = "";
+    file_output.innerHTML = "";
+
     // get data to export
     const data = JSON.stringify(await export_all_data());
 
@@ -49,22 +62,29 @@ document.getElementById("export-button").onclick = async event => {
 const clear_button = document.getElementById("clear-button");
 const clear_confirm_button = document.getElementById("clear-confirm-button");
 const clear_cancel_button = document.getElementById("clear-cancel-button");
-const clear_output = document.getElementById("clear-output");
 
 clear_button.onclick = event => {
+    clear_output.innerHTML = "";
+    file_output.innerHTML = "";
+
     clear_button.style.display = "none";
     clear_confirm_button.style.display = "block";
     clear_cancel_button.style.display = "block";
-    clear_output.innerHTML = "";
 }
 
 clear_cancel_button.onclick = event => {
+    clear_output.innerHTML = "";
+    file_output.innerHTML = "";
+
     clear_button.style.display = "block";
     clear_confirm_button.style.display = "none";
     clear_cancel_button.style.display = "none";
 }
 
 clear_confirm_button.onclick = async event => {
+    clear_output.innerHTML = "";
+    file_output.innerHTML = "";
+
     await browser.storage.local.clear();
 
     clear_button.style.display = "block";
