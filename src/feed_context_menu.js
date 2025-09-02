@@ -48,7 +48,8 @@ export async function open_feed_context_menu(feed_view) {
     const delete_button = menu.querySelector(".NB-menu-manage-delete");
     delete_button.onclick = (event) => {
         const folder_name = folders.get_feed_view_folder_name(feed_view);
-        delete_feed(feed_data, feed_view, folder_name);
+        storage.delete_feed_in_folder(feed_data.attributes.id, folder_name);
+        feed_view.remove();
         menu.style.display = "none";
         document.removeEventListener("click", click_event);
     }
@@ -164,14 +165,15 @@ function select_folders_in_selector(folder_names) {
 }
 
 function get_selected_folder_names() {
-    const folder_names = [];
     const container = document.querySelector(".NB-change-folders");
-    const selected_options = Array.from(container.querySelectorAll("NB-folder-option-active"));
-    for (const option of selected_options) {
-        folder_names.push(option.innerText);
-    }
-
-    return folder_names;
+    const selected_options = Array.from(container.querySelectorAll(".NB-folder-option-active"));
+    return selected_options.map(option => {
+            if (option.innerText === "Top Level")
+                return "";
+            else
+                return option.innerText.toLowerCase();
+        }
+    );
 }
 
 function open_folder_selector(menu, feed_data) {

@@ -5,11 +5,6 @@ import * as storage from "./storage.js";
 import { waitForElm } from "./utils.js";
 import { parse_rss } from "./rss.js";
 
-export async function delete_feed(feed_data, feed_view, folder_name) {
-    await storage.delete_feed_in_folder(feed_data.attributes.id, folder_name);
-    feed_view.remove();
-}
-
 export function get_feed_view(feed_data, folder_view) {
     for (const feed of folder_view.querySelector(".folder").children) {
         if (feed.getAttribute("data-id") == feed_data.attributes.id) {
@@ -21,13 +16,25 @@ export function get_feed_view(feed_data, folder_view) {
 }
 
 export async function move_folders(feed_data, new_folder_names) {
+    // delete from folders
     for (const folder_name of feed_data.folders) {
         if (new_folder_names.includes(folder_name)) continue;
 
         const folder_view = folders.get_folder_element(folder_name);
         const feed_view = get_feed_view(feed_data, folder_view);
-        await delete_feed(feed_data, feed_view, folder_name);
+        feed_view.remove();
     }
+
+    // add to folders
+    for (const folder_name of new_folder_names) {
+        if (feed_data.folders.includes(folder_name)) continue;
+
+        const folder_view = folders.get_folder_element(folder_name);
+        add_feed_to_folder_view(feed_data, folder_view, folder_name);
+    }
+
+    // update storage
+    storage.set_feed_folders(feed_data.attributes.id, new_folder_names);
 }
 
 export async function load_local_feeds() {
@@ -38,19 +45,23 @@ export async function load_local_feeds() {
     }
 }
 
+export async function add_feed_to_folder_view(feed_data, folder_view, folder_name) {
+    const view = await create_feed_title_view(feed_data);
+
+    /* add feed view to document */
+    const folder_list = folder_view.querySelector(".folder");
+    if (folder_name === "") {
+        const first_child = folder_list.childNodes[0];
+        folder_list.insertBefore(view, first_child);
+    } else {
+        folder_list.appendChild(view);
+    }
+}
+
 export async function add_feed_to_document(feed_data) {
     for (var folder_name of feed_data.folders) {
-        const view = await create_feed_title_view(feed_data);
-
-        /* add feed view to document */
-        const folder = folders.get_folder_element(folder_name);
-        const folder_list = folder.querySelector(".folder");
-        if (folder_name === "") {
-            const first_child = folder_list.childNodes[0];
-            folder_list.insertBefore(view, first_child);
-        } else {
-            folder_list.appendChild(view);
-        }
+        const folder_view = folders.get_folder_element(folder_name);
+        await add_feed_to_folder_view(feed_data, folder_view, folder_name);
     }
 }
 
