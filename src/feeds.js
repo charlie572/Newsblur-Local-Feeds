@@ -107,7 +107,7 @@ export async function create_feed_title_view(feed_data) {
             <div class="feed_counts_floater">\
                 <div class=" unread_neutral">\
                     <span class="unread_count unread_count_positive unread_count_empty">0</span>\
-                    <span class="unread_count unread_count_neutral unread_count_full">${num_unread}</span>\
+                    <span class="unread_count unread_count_neutral unread_count_empty">0</span>\
                     <span class="unread_count unread_count_negative unread_count_empty">0</span>\
                 </div>\
             </div>\
@@ -127,6 +127,8 @@ export async function create_feed_title_view(feed_data) {
         event.stopPropagation();
         context_menu.open_feed_context_menu(view);
     };
+
+    set_feed_focussed(feed_data, view, feed_data.focussed);
 
     return view;
 }
