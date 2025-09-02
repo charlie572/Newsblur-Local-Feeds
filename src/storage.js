@@ -106,6 +106,12 @@ export async function set_feed_folders(feed_id, folders) {
     await browser.storage.local.set(result);
 }
 
+export async function set_feed_focussed(feed_id, focussed) {
+    const result = await browser.storage.local.get("local_feeds");
+    result.local_feeds[feed_id].focussed = focussed;
+    await browser.storage.local.set(result);
+}
+
 export async function delete_feed_in_folder(feed_id, folder) {
     const result = await browser.storage.local.get([
         "local_feeds",
