@@ -1,6 +1,6 @@
 export function get_folder_element(folder_name) {
     if (folder_name === "") {
-        return document.querySelector(".NB-root");
+        return document.querySelector(".NB-root").parentElement;
     }
 
     const folders = Array.from(document.querySelectorAll(".NB-root .NB-folder"));

@@ -11,7 +11,7 @@ export async function delete_feed(feed_data, feed_view, folder_name) {
 }
 
 export function get_feed_view(feed_data, folder_view) {
-    for (const feed of folder_view.children) {
+    for (const feed of folder_view.querySelector(".folder").children) {
         if (feed.getAttribute("data-id") == feed_data.attributes.id) {
             return feed;
         }
@@ -44,11 +44,12 @@ export async function add_feed_to_document(feed_data) {
 
         /* add feed view to document */
         const folder = folders.get_folder_element(folder_name);
+        const folder_list = folder.querySelector(".folder");
         if (folder_name === "") {
-            const first_child = folder.childNodes[0];
-            folder.insertBefore(view, first_child);
+            const first_child = folder_list.childNodes[0];
+            folder_list.insertBefore(view, first_child);
         } else {
-            folder.querySelector(".folder").appendChild(view);
+            folder_list.appendChild(view);
         }
     }
 }
