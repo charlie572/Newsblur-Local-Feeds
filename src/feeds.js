@@ -228,5 +228,5 @@ export function get_selected_feed_view() {
 
 export function is_local_feed_open() {
     const feed = get_selected_feed_view();
-    return is_local_feed(feed);
+    return feed && is_local_feed(feed);
 }
