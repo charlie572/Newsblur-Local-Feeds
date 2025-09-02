@@ -1,5 +1,6 @@
 import * as storage from "./storage.js";
 import * as feeds from "./feeds.js";
+import * as folders from "./folders.js";
 
 export async function open_feed_context_menu(feed_view) {
     const feed_data = await storage.get_feed_from_storage(feed_view.getAttribute("data-id"));
@@ -47,11 +48,15 @@ export async function open_feed_context_menu(feed_view) {
     // delete
     const delete_button = menu.querySelector(".NB-menu-manage-delete");
     delete_button.onclick = (event) => {
-        const folder_name = folders.get_feed_view_folder_name(feed_view);
-        storage.delete_feed_in_folder(feed_data.attributes.id, folder_name);
-        feed_view.remove();
-        menu.style.display = "none";
-        document.removeEventListener("click", click_event);
+        if (delete_button.innerText === "Really delete?") {
+            const folder_name = folders.get_feed_view_folder_name(feed_view);
+            storage.delete_feed_in_folder(feed_data.attributes.id, folder_name);
+            feed_view.remove();
+            menu.style.display = "none";
+            document.removeEventListener("click", click_event);
+        } else {
+            delete_button.querySelector(".NB-menu-manage-title").textContent = "Really delete?";
+        }
     }
 
     // move folders
