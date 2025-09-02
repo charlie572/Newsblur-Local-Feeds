@@ -5,6 +5,38 @@ import * as storage from "./storage.js";
 import { waitForElm } from "./utils.js";
 import { parse_rss } from "./rss.js";
 
+export async function set_feed_focussed(feed_data, feed_view, focussed) {
+    // set feed view class
+    feed_view.classList.remove(focussed ? "unread_neutral" : "unread_positive");
+    feed_view.classList.add(focussed ? "unread_positive" : "unread_neutral");
+
+    // set count containerclass
+    const unread_count_container = feed_view.querySelector(".feed_counts_floater").children[0];
+    unread_count_container.classList.remove(focussed ? "unread_neutral" : "unread_positive");
+    unread_count_container.classList.add(focussed ? "unread_positive" : "unread_neutral");
+
+    // remove count type
+    var unread_count = unread_count_container.querySelector(
+        focussed ? ".unread_count_neutral" : ".unread_count_positive"
+    );
+    unread_count.classList.remove("unread_count_full");
+    unread_count.classList.add("unread_count_empty");
+    unread_count.innerHTML = "0";
+
+    // add count type
+    unread_count = unread_count_container.querySelector(
+        focussed ? ".unread_count_positive" : ".unread_count_neutral"
+    );
+    unread_count.classList.remove("unread_count_empty");
+    unread_count.classList.add("unread_count_full");
+    const num_unread = await storage.get_num_unread(feed_data.attributes.id);
+    unread_count.innerHTML = String(num_unread);
+
+    // update storage
+    feed_data.focussed = focussed;
+    await storage.set_feed_focussed(feed_data.attributes.id, focussed);
+}
+
 export function get_feed_view(feed_data, folder_view) {
     for (const feed of folder_view.querySelector(".folder").children) {
         if (feed.getAttribute("data-id") == feed_data.attributes.id) {

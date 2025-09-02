@@ -87,8 +87,7 @@ export async function open_feed_context_menu(feed_view) {
             title.textContent = "Focus feed";
         }
 
-        feed_data.focussed = !feed_data.focussed;
-        storage.set_feed_focussed(feed_data.attributes.id, feed_data.focussed);
+        feeds.set_feed_focussed(feed_data, feed_view, !feed_data.focussed);
     }
 }
 
