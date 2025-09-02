@@ -214,38 +214,7 @@ export async function add_local_feed(rss_url, folder_name) {
         "feed_title": rss_data.title,
         "feed_address": rss_url,
         "feed_link": rss_data.link,
-        "num_subscribers": 28,
-        "updated": "52 minutes",
-        "updated_seconds_ago": 3179,
-        "fs_size_bytes": 4130982,
-        "archive_count": 332,
-        "last_story_date": "2025-08-21 11:00:00",
-        "last_story_seconds_ago": 121182,
-        "stories_last_month": 11,
-        "average_stories_per_month": 6,
-        "min_to_decay": 240,
-        "subs": 28,
-        "is_push": true,
-        "is_newsletter": false,
-        "search_indexed": true,
-        "discover_indexed": true,
-        "favicon_color": "ff184a",
-        "favicon_fade": "ff3668",
-        "favicon_border": "bf1237",
-        "favicon_text_color": "white",
-        "favicon_fetching": false,
         "favicon_url": rss_data.image_url,
-        "s3_page": false,
-        "s3_icon": true,
-        "similar_feeds": [],
-        "ps": 0,
-        "nt": rss_data.items.length,
-        "ng": 0,
-        "active": true,
-        "fetched_once": true,
-        "has_exception": false,
-        "feed_opens": 4,
-        "subscribed": true,
     };
 
     folder_name = folder_name.split(":")[1].toLowerCase();
@@ -253,8 +222,11 @@ export async function add_local_feed(rss_url, folder_name) {
     const feed_data = {
         attributes: feed_attributes,
         folders: [folder_name],
+        last_fetch: Date.now(),
     };
     await storage.add_local_feed_to_storage(feed_data);
+
+    await storage.update_feed_stories(feed_data.attributes.id, rss_data.items);
 
     add_feed_to_document(feed_data);
 }

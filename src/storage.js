@@ -40,39 +40,41 @@ export function create_story_data(story_rss_data) {
     return {attributes};
 }
 
-export async function get_stories(feed_id) {
-    const feed_data = await get_feed_from_storage(feed_id);
-
-    /* fetch rss feed */
-    const rss_url = feed_data.attributes.feed_address;
-    const rss_data = await parse_rss(rss_url);
-
+export async function update_feed_stories(feed_id, rss_items) {
     /* get all story data in browser */
     const result = await browser.storage.local.get([
         "local_stories",
         "feed_story_hashes"
     ]);
-    const story_hashes = result.feed_story_hashes[feed_id] || [];
-    const local_stories = result.local_stories;
 
-    /* create stories that aren't in browser storage yet */
-    const story_data = [];
-    for (const item of rss_data.items) {
+    /* create stories that aren't in browser storage yet, 
+       and build list of hashes */
+    const story_hashes = [];
+    for (const item of rss_items) {
         const story_hash = create_story_hash(item);
-        if (story_hash in local_stories) {
-            story_data.push(local_stories[story_hash]);
-        } else {
+        story_hashes.push(story_hash);
+
+        if (!(story_hash in result.local_stories)) {
             const data = create_story_data(item);
-            local_stories[story_hash] = data;
-            story_data.push(data);
+            result.local_stories[story_hash] = data;
         }
     }
 
-    /* save stories to browser storage */
-    result.local_stories[feed_id] = story_data;
+    /* save to browser storage */
+    result.feed_story_hashes[feed_id] = story_hashes;
     await browser.storage.local.set(result);
+}
 
-    return story_data;
+export async function get_stories(feed_id) {
+    const result = await browser.storage.local.get([
+        "local_stories", 
+        "feed_story_hashes",
+    ]);
+
+    const story_hashes = result.feed_story_hashes[feed_id];
+    const stories = story_hashes.map(story_hash => result.local_stories[story_hash]);
+
+    return stories;
 }
 
 export async function get_story_by_hash(story_hash) {
@@ -147,6 +149,8 @@ export async function add_local_feed_to_storage(feed_data) {
 }
 
 export async function setup_storage() {
+    await browser.storage.local.clear();
+
     const result = await browser.storage.local.get([
         "local_feeds", 
         "local_stories", 
