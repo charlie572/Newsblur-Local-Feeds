@@ -44,3 +44,32 @@ document.getElementById("export-button").onclick = async event => {
     download.setAttribute("download", filename);
     download.click();
 };
+
+// clearing all data
+const clear_button = document.getElementById("clear-button");
+const clear_confirm_button = document.getElementById("clear-confirm-button");
+const clear_cancel_button = document.getElementById("clear-cancel-button");
+const clear_output = document.getElementById("clear-output");
+
+clear_button.onclick = event => {
+    clear_button.style.display = "none";
+    clear_confirm_button.style.display = "block";
+    clear_cancel_button.style.display = "block";
+    clear_output.innerHTML = "";
+}
+
+clear_cancel_button.onclick = event => {
+    clear_button.style.display = "block";
+    clear_confirm_button.style.display = "none";
+    clear_cancel_button.style.display = "none";
+}
+
+clear_confirm_button.onclick = async event => {
+    await browser.storage.local.clear();
+
+    clear_button.style.display = "block";
+    clear_confirm_button.style.display = "none";
+    clear_cancel_button.style.display = "none";
+
+    clear_output.innerHTML = "Deleted all data.";
+}
