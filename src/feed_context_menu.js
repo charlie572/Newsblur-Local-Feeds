@@ -34,6 +34,9 @@ export async function open_feed_context_menu(feed_view) {
         </div>'
     );
 
+    const move_submit = document.querySelector(".NB-menu-manage-move-save");
+    move_submit.style.display = "none";
+
     // close when clicked outside the context menu
     const click_event = (event) => {
         if (!menu.contains(event.target)) {
@@ -163,4 +166,7 @@ function open_folder_selector(menu, feed_data) {
     create_folder_selector_hierarchy(hierarchy, folder_container);
 
     select_folders_in_selector(feed_data.folders);
+
+    const move_submit = document.querySelector(".NB-menu-manage-move-save");
+    move_submit.style.display = "block";
 }
