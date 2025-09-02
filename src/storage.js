@@ -149,8 +149,6 @@ export async function add_local_feed_to_storage(feed_data) {
 }
 
 export async function setup_storage() {
-    await browser.storage.local.clear();
-
     const result = await browser.storage.local.get([
         "local_feeds", 
         "local_stories", 
