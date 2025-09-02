@@ -1,3 +1,5 @@
+import { import_all_data, export_all_data } from "../src/storage";
+
 // import button
 document.getElementById("import-button").onclick = async event => {
     const file_input = document.getElementById("file_input");
@@ -24,5 +26,21 @@ document.getElementById("import-button").onclick = async event => {
     file_input.click();
 };
 
-// document.getElementById("export-button").onclick = event => {
-// };
+document.getElementById("export-button").onclick = async event => {
+    // get data to export
+    const data = JSON.stringify(await export_all_data());
+
+    // create filename
+    const now = new Date();
+    const version = browser.runtime.getManifest().version;
+    const filename = `newsblur_local_feeds_v${version}_export_${now.toISOString()}.json`;
+
+    // download
+    const download = document.createElement("a");
+    download.setAttribute(
+        "href", 
+        "data:text/plan;charset=utf-8," + encodeURIComponent(data)
+    );
+    download.setAttribute("download", filename);
+    download.click();
+};

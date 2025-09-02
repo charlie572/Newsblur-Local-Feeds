@@ -168,3 +168,29 @@ export async function get_num_unread(feed_id) {
     const stories = await get_stories(feed_id);
     return stories.filter(story => story.attributes.read_status === 0).length;
 }
+
+export async function import_all_data(data) {
+    if (data.version === undefined)
+        return "Couldn't import data. No version number present in data.";
+    if (data.version !== browser.runtime.getManifest().version)
+        return "Couldn't import data. Data was exported from a different extension version.";
+
+    delete data.version;
+
+    await browser.storage.set(data);
+
+    return "";
+}
+
+export async function export_all_data() {
+    const data = await browser.storage.local.get([
+        "local_feeds", 
+        "local_stories", 
+        "feed_story_hashes",
+        "next_feed_id",
+    ]);
+
+    data.version = browser.runtime.getManifest().version;
+
+    return data;
+}
