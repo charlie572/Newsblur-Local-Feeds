@@ -14,7 +14,11 @@ export async function open_feed_context_menu(feed_view) {
     menu.style.position = "absolute";
     menu.style.inset = `${feed_rect.top}px auto auto ${feed_rect.left}px`;
     menu.innerHTML = (
-        '<ul class="NB-menu-manage NB-menu-manage-feed">\
+        `<ul class="NB-menu-manage NB-menu-manage-feed">\
+            <li role="button" class="NB-menu-item focus-feed">\
+                <div class="NB-menu-manage-image"></div>\
+                <div class="NB-menu-manage-title">${feed_data.focussed ? 'Unfocus feed' : 'Focus feed'}</div>\
+            </li>\
             <li role="button" class="NB-menu-item NB-menu-manage-delete">\
                 <div class="NB-menu-manage-image"></div>\
                 <div class="NB-menu-manage-title">Delete this site</div>\
@@ -33,7 +37,7 @@ export async function open_feed_context_menu(feed_view) {
         </ul>\
         <div class="NB-menu-manage-arrow" style="border-radius: 0px 0px 5px 5px;">\
             <div class="NB-icon"></div>\
-        </div>'
+        </div>`
     );
 
     // close when clicked outside the context menu
@@ -72,6 +76,17 @@ export async function open_feed_context_menu(feed_view) {
         const new_folder_names = get_selected_folder_names();
         feeds.move_folders(feed_data, new_folder_names);
     };
+
+    // focus
+    const focus_button = document.querySelector(".focus-feed");
+    focus_button.onclick = (event) => {
+        const title = focus_button.querySelector(".NB-menu-manage-title");
+        if (focus_button.innerText === "Focus feed") {
+            title.textContent = "Unfocus feed";
+        } else {
+            title.textContent = "Focus feed";
+        }
+    }
 }
 
 function get_folder_hierarchy(root) {
