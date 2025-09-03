@@ -5,6 +5,8 @@ import * as storage from "./storage.js";
 import { waitForElm } from "./utils.js";
 import { parse_rss } from "./rss.js";
 
+var local_feed_open = false;
+
 export async function set_feed_focussed(feed_data, feed_view, focussed) {
     // set feed view class
     feed_view.classList.remove(focussed ? "unread_neutral" : "unread_positive");
@@ -188,8 +190,24 @@ export async function open_split_view() {
     }
 }
 
+export async function close_local_feed() {
+    if (!local_feed_open) {
+        return;
+    }
+
+    const taskbar = document.getElementById("story_taskbar");
+    taskbar.style.display = "block";
+
+    deselect_local_feed();
+
+    local_feed_open = false;
+}
+
 export async function open_feed(feed_data, feed_view) {
     await open_split_view();
+
+    const taskbar = document.getElementById("story_taskbar");
+    taskbar.style.display = "none";
 
     const story_data = await storage.get_stories(feed_data.attributes.id);
 
@@ -203,6 +221,8 @@ export async function open_feed(feed_data, feed_view) {
     }
 
     stories.open_story(story_data[0], story_titles.firstChild);
+
+    local_feed_open = true;
 }
 
 export async function add_local_feed(rss_url, folder_name) {
@@ -244,6 +264,5 @@ export function get_selected_feed_view() {
 }
 
 export function is_local_feed_open() {
-    const feed = get_selected_feed_view();
-    return feed && is_local_feed(feed);
+    return local_feed_open;
 }

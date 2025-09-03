@@ -29,7 +29,7 @@ async function process_keydown(event) {
 
 async function main() {
     await storage.setup_storage();
-    feeds.bind_feed_clicks((feed) => feeds.deselect_local_feed());
+    feeds.bind_feed_clicks(event => feeds.close_local_feed());
     await feeds.load_local_feeds();
 
     const add_button = document.querySelector(".NB-task-add");
