@@ -1,3 +1,4 @@
 node_modules
 dist
 injected_dist
+web-ext-artifacts
