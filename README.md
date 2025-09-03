@@ -10,7 +10,9 @@ Features
 - Importing and exporting all data in this extension.
 - Keyboard shortcuts j, k, m, and u, for navigating between stories and marking them as read.
 
-Only the split view is supported for viewing local feeds.
+Limitations
+- Only the split view is supported for viewing local feeds. 
+- All data is stored locally, so it won't sync up between browser instances.
 
 #  Installation (Developer)
 
