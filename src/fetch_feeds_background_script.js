@@ -1,7 +1,7 @@
 import * as storage from "./storage.js";
 import { parse_rss } from "./rss.js";
 
-const FETCH_PERIOD = 10 * 60 * 1000;  // milliseconds between fetches for a feed
+const FETCH_PERIOD = 3 * 60 * 60 * 1000;  // milliseconds between fetches for a feed
 
 async function fetch_feed(feed_data) {
     const rss_url = feed_data.attributes.feed_address;
